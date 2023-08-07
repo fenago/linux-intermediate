@@ -1,6 +1,6 @@
 
-Lab: Controlling Processes
---------------------------
+Lab: Advanced Shell Features: Controlling Process
+----------------------------------------------------
 
 
 Any program that is running on your system is a process. In this

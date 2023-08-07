@@ -1,6 +1,6 @@
 
-Lab: You Need a Cron Job
-========================
+Lab: Multitasking and Batch Processing: Cron
+============================================
 
 
 In this lab, you will learn how to automate boring tasks in Linux by

@@ -1,6 +1,6 @@
 
-Lab: Copying, Moving, and Deleting Files
-----------------------------------------
+Lab: Review of the File System: Manipulating Files & Directories
+---------------------------------------------------------------
 
 If you have ever owned a computer before, then you know how important it
 is to be able to copy and move files around. That\'s why I dedicated an

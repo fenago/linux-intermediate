@@ -1,5 +1,5 @@
-Lab: Shell Scripting Overview
-=============================
+Lab: Shell Programming
+======================
 
 To complete a specific task in Linux, you will often find yourself
 running the same set of commands over and over again. This process can

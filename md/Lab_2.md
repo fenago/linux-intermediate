@@ -1,6 +1,6 @@
 
-Lab: The Linux File System
-==========================
+Lab: Review of the File System
+==============================
 
 
 In this lab, you will climb a very special tree, which is the Linux

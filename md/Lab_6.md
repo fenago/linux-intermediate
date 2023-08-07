@@ -1,5 +1,5 @@
-Lab: Hard versus Soft Links
-===========================
+Lab: Review of the File System: Hard versus Soft Links
+======================================================
 
 In this lab, we further our knowledge on Linux files, and we discuss
 the differences between hard and soft links. If you have ever created a

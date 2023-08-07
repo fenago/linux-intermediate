@@ -78,27 +78,6 @@ True or false
 4.  False
 5.  True
 
-
-Knowledge check 5
-=================
-
-
-1.  [type echo]
-2.  [which uptime]
-3.  [whatis mkdir]
-4.  [man mv]
-5.  [apropos calendar]
-6.  [help history]
-
-True or false
--------------
-
-1.  False
-2.  False
-3.  True
-4.  True
-
-
 Knowledge check 6
 =================
 
@@ -124,41 +103,6 @@ True or false
 5.  True
 6.  False
 7.  True
-
-
-Knowledge check 7
-=================
-
-
-1.  [su root]
-2.  [passwd root]
-3.  [su - elliot]
-4.  [su]
-
-True or false
--------------
-
-1.  True
-2.  True
-3.  False
-
-
-Knowledge check 8
-=================
-
-
-1.  [useradd -u 333 abraham]
-2.  [groupadd admins]
-3.  [usermod -aG admins abraham]
-4.  [chgrp admins /home/abraham]
-5.  [chmod g=r /home/abraham]
-
-True or false
--------------
-
-1.  True
-2.  False
-3.  False
 
 
 Knowledge check 9
@@ -193,17 +137,6 @@ Knowledge check 11
 5.  [find / -group developers]
 
 
-Knowledge check 12
-==================
-
-
-1.  [apt-get install tmux]
-2.  [apt-cache depends vim]
-3.  [apt-get install cowsay]
-4.  [apt-get purge cowsay]
-5.  [apt-get update then run apt-get upgrade]
-
-
 Knowledge check 13
 ==================
 
@@ -213,28 +146,6 @@ Knowledge check 13
 3.  [kill -9 pid\_of\_terminal]
 4.  [firefox &]
 5.  [renice -n -20 pid\_of\_firefox]
-
-
-Knowledge check 14
-==================
-
-
-1.  [smurf ALL=(ALL) /sbin/fdisk]
-2.  [%developers ALL=(ALL) /usr/bin/apt-get]
-3.  [sudo -lU smurf]
-
-
-Knowledge check 15
-==================
-
-
-1.  [hostnamectl set-hostname darkarmy]
-2.  [netstat -rn or ip route]
-3.  [traceroute www.ubuntu.com]
-4.  [cat /etc/resolv.conf]
-5.  [nslookup www.distrowatch.com]
-6.  [ifconfig eth0 down]
-7.  [ifconfig eth0 up]
 
 
 Knowledge check 16
@@ -279,18 +190,4 @@ Knowledge check 18
 1.  [tar -cvf /root/var.tar.gz /var]
 2.  [tar -jvf /root/tmp.tar.bz2 /tmp]
 3.  [tar -Jvf /root/etc.tar.xz /etc]
-
-
-Knowledge check 19
-==================
-
-
-1.  [alias ins="apt-get install"]
-
-2.  [alias packages="dpkg -l"]
-
-3.  Add the line\
-    [alias clean=\"rm -r /tmp/\*\"]\
-
-    to the end of the [.bashrc] file.
 

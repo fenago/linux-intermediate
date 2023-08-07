@@ -1,6 +1,6 @@
 
-Lab: Linux File Editors
------------------------
+Lab: Text Manipulation Utilities
+-----------------------------------
 
 
 **Graphical editors -- gedit and kate**

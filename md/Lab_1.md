@@ -1,5 +1,5 @@
-Lab: System Administration Overview
------------------------------------
+Lab: Linux System Overview
+--------------------------
 
 To access the Linux **Command Line Interface**, you need to open the
 [Terminal Emulator], which is often referred to as the

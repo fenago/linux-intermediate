@@ -1,6 +1,6 @@
 
-Lab: Piping and I/O Redirection
-===============================
+Lab: Introduction to Shells: sh, bash, and ksh: Piping and I/O Redirection
+==========================================================================
 
 
 One of the main principles in Linux is that *Each program does one thing

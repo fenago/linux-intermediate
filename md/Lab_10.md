@@ -1,6 +1,6 @@
 
-Lab: Analyzing and Manipulating Files
-=====================================
+Lab: File Processing Utilities: Examining and Comparing Files
+=============================================================
 
 
 In this lab, you will learn various Linux commands that will help

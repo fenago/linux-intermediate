@@ -1,6 +1,6 @@
 
-Lab: Find/Locate Files
-----------------------
+Lab: File Processing Utilities: Find/Locate Files
+--------------------------------------------------
 
 In this lab, you will learn two different ways you can use to search and locate files.
 

@@ -1,5 +1,5 @@
-Lab: System Backups
-===================
+Lab: File Processing Utilities: Compressing Data
+================================================
 
 In this lab, you will learn how to put a group of files together
 into a single archive. You will also learn how to compress an archive
