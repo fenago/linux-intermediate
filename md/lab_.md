@@ -1,3 +1,5 @@
+Lab: Regular Expressions
+------------------------
 
 Linux has two regular expression engines:
 
@@ -10,16 +12,16 @@ Linux has two regular expression engines:
 Perhaps the simplest BRE pattern is a regular expression for finding the exact occurrence of a sequence of characters in a text. This is what sed and awk look like for a string:
 
 ```
-~$ echo "This is a test" | sed -n '/test/p'
+elliot©ubuntu:-$ echo "This is a test" | sed -n '/test/p'
 This is a test
-~$ echo "This is a test" | awk '/test/{print $0}'
+elliot©ubuntu:-$ echo "This is a test" | awk '/test/{print $0}'
 This is a test
 ```
 
 When working with regular expressions, keep in mind that they are case-sensitive:
 
 ```
-~$ echo "This is a test" | awk '/test/{print $0}'
+elliot©ubuntu:-$ echo "This is a test" | awk '/test/{print $0}'
 This is a test
 ```
 
@@ -28,7 +30,7 @@ The first regular expression did not match, since the word “test” starting w
 In regular expressions, you can use not only letters but also spaces and numbers:
 
 ```
-~$ echo "This is a test 2 again" | awk '/test 2/{print $0}'
+elliot©ubuntu:-$ echo "This is a test 2 again" | awk '/test 2/{print $0}'
 This is a test 2 again
 ```
 
@@ -53,9 +55,9 @@ There is 10$ on my pocket
 The dollar sign can be detected using a pattern like this:
 
 ```
-~$ cat myfile
+elliot©ubuntu:-$ cat myfile
 There is 10$ on my pocket
-~$ awk '/\$/{print $0}' myfile
+elliot©ubuntu:-$ awk '/\$/{print $0}' myfile
 There is 10$ on my pocket
 ```
 
@@ -63,7 +65,7 @@ There is 10$ on my pocket
 Also, a backslash is also a special character, so if you want to use it in a pattern, you will need to escape it too. It looks like two forward slashes:
 
 ```
-~$ echo "\ is a special character" | awk '/\\/{print $0}'
+elliot©ubuntu:-$ echo "\ is a special character" | awk '/\\/{print $0}'
 \ is a special character
 ```
 
@@ -73,13 +75,15 @@ Also, a backslash is also a special character, so if you want to use it in a pat
 
 A period is used to search for any single character except for line feed. Let’s pass to such a regular expression a file myfile, the contents of which are given below:
 
+**Note:** Make sure to update `myfile` content as below:
+
 ```
-~$ cat myfile
+elliot©ubuntu:-$ cat myfile
 this is a test
 This is another test
 And this is one more
 start with this
-~$ awk '/.st/{print $0}' myfile
+elliot©ubuntu:-$ awk '/.st/{print $0}' myfile
 this is a test
 This is another test
 ```
@@ -94,12 +98,12 @@ The period matches any single character, but what if you need more flexibility t
 Thanks to this approach, you can organize a search for any character from a given set. Square brackets are used to describe a character class — `[]`:
 
 ```
-~$ cat myfile
+elliot©ubuntu:-$ cat myfile
 this is a test
 This is another test
 And this is one more
 start with this
-~$ awk '/[oi]th/{print $0}' myfile
+elliot©ubuntu:-$ awk '/[oi]th/{print $0}' myfile
 This is another test
 start with this
 ```
@@ -109,9 +113,9 @@ Here we are looking for the “th” character sequence preceded by the “o” 
 Classes come in handy when looking for words that can start with both uppercase and lowercase letters:
 
 ```
-~$ echo "this is a test" | awk '/[Tt]his is a test/{print $0}'
+elliot©ubuntu:-$ echo "this is a test" | awk '/[Tt]his is a test/{print $0}'
 this is a test
-~$ echo "This is a test" | awk '/[Tt]his is a test/{print $0}'
+elliot©ubuntu:-$ echo "This is a test" | awk '/[Tt]his is a test/{print $0}'
 This is a test
 ```
 
@@ -127,11 +131,11 @@ The POSIX ERE templates that some Linux utilities support may contain additional
 The question mark indicates that the preceding character may appear once in the text or not at all. This character is one of the repetition metacharacters. Here are some examples:
 
 ```
-~$ echo "tet" | awk '/tes?t/{print $0}'
+elliot©ubuntu:-$ echo "tet" | awk '/tes?t/{print $0}'
 tet
-~$ echo "test" | awk '/tes?t/{print $0}'
+elliot©ubuntu:-$ echo "test" | awk '/tes?t/{print $0}'
 test
-~$ echo "tesst" | awk '/tes?t/{print $0}'
+elliot©ubuntu:-$ echo "tesst" | awk '/tes?t/{print $0}'
 ```
 
 As you can see, in the third case the letter “s” occurs twice, so the regular expression does not respond to the word “tesst”.
@@ -139,14 +143,14 @@ As you can see, in the third case the letter “s” occurs twice, so the regula
 The question mark can be used with character classes as well:
 
 ```
-~$ echo "tst" | awk '/t[ae]?st/{print $0}'
+elliot©ubuntu:-$ echo "tst" | awk '/t[ae]?st/{print $0}'
 tst
-~$ echo "test" | awk '/t[ae]?st/{print $0}'
+elliot©ubuntu:-$ echo "test" | awk '/t[ae]?st/{print $0}'
 test
-~$ echo "tast" | awk '/t[ae]?st/{print $0}'
+elliot©ubuntu:-$ echo "tast" | awk '/t[ae]?st/{print $0}'
 tast
-~$ echo "taest" | awk '/t[ae]?st/{print $0}'
-~$ echo "teest" | awk '/t[ae]?st/{print $0}'
+elliot©ubuntu:-$ echo "taest" | awk '/t[ae]?st/{print $0}'
+elliot©ubuntu:-$ echo "teest" | awk '/t[ae]?st/{print $0}'
 ```
 
 If there are no characters from the class in the string, or one of them occurs once, the regular expression works, however, as soon as two characters appear in the word, the system no longer finds a match for the pattern in the text.
@@ -156,22 +160,22 @@ If there are no characters from the class in the string, or one of them occurs o
 The plus symbol in the pattern indicates that the regular expression will find the desired one if the preceding character occurs one or more times in the text. At the same time, such a construction will not react to the absence of a symbol:
 
 ```
-~$ echo "test" | awk '/te+st/{print $0}'
+elliot©ubuntu:-$ echo "test" | awk '/te+st/{print $0}'
 test
-~$ echo "teest" | awk '/te+st/{print $0}'
+elliot©ubuntu:-$ echo "teest" | awk '/te+st/{print $0}'
 teest
-~$ echo "tst" | awk '/te+st/{print $0}'
+elliot©ubuntu:-$ echo "tst" | awk '/te+st/{print $0}'
 ```
 
 In this example, if there is no e in a word, the regular expression engine will not find a match in the text. The plus symbol also works with character classes, which makes it look like an asterisk and a question mark:
 
 ```
-~$ echo "tst" | awk '/t[ae]+st/{print $0}'
-~$ echo "test" | awk '/t[ae]+st/{print $0}'
+elliot©ubuntu:-$ echo "tst" | awk '/t[ae]+st/{print $0}'
+elliot©ubuntu:-$ echo "test" | awk '/t[ae]+st/{print $0}'
 test
-~$ echo "teast" | awk '/t[ae]+st/{print $0}'
+elliot©ubuntu:-$ echo "teast" | awk '/t[ae]+st/{print $0}'
 teast
-~$ echo "teeast" | awk '/t[ae]+st/{print $0}'
+elliot©ubuntu:-$ echo "teeast" | awk '/t[ae]+st/{print $0}'
 teeast
 ```
 

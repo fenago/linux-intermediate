@@ -1,10 +1,7 @@
 Lab: Linux System Overview
 --------------------------
 
-To access the Linux **Command Line Interface**, you need to open the
-[Terminal Emulator], which is often referred to as the
-**Terminal** for simplicity.
-
+To access the Linux **Command Line Interface**, you need to open the **Terminal**.
 
 Let\'s walk through an example
 to understand and tie everything together. Go ahead and open the
