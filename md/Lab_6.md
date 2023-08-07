@@ -1,544 +1,440 @@
-Lab: Review of the File System: Hard versus Soft Links
-======================================================
 
-In this lab, we further our knowledge on Linux files, and we discuss
-the differences between hard and soft links. If you have ever created a
-shortcut in Windows (or macOS) before, you will quickly grasp the
-concept of a soft link. But before we discuss hard and soft links, you
-first have to understand the concept of an inode.
+Lab: Introduction to Shells: sh, bash, and ksh: Piping and I/O Redirection
+==========================================================================
 
 
+One of the main principles in Linux is that *Each program does one thing
+well* and thus, every Linux command is designed to accomplish a single
+task efficiently. In this lab, you will learn how to use Linux pipes
+to unleash the real power of Linux commands by combining their
+functionality to carry out more complex tasks. You will also learn about
+I/O (input/output) redirection, which will enable you to read user input
+and save command output to a file.
 
-Displaying file inode number
-============================
+
+Linux pipes
+===========
 
 
-There are two commands you can use to view the inode number of a file:
+In Linux, you can use a pipe to send the output of one command to be the
+input (argument) of another command:
 
-1.  [ls -i] file
-2.  [stat] file
 
-For example, to view the inode number of [facts.txt], you can run
-the command [ls -i facts.txt]:
+![](./images/51ed85f7-0bf5-4bc6-9d5e-35f9d0eb0785.png)
 
-``` 
-elliot@ubuntu-linux:~$ ls -i facts.txt 
-924555 facts.txt
-```
 
-And it will spit out the inode number for you. You can also use the
-[stat] command:
+Before we do an example, let\'s first rename the [hard.txt] file
+to [facts.txt], as we removed the [facts.txt] file back in `Lab 6`,
+*Hard vs. Soft Links*:
 
 ``` 
-elliot@ubuntu-linux:~$ stat facts.txt 
-File: facts.txt
-Size: 173 Blocks: 8 IO Block: 4096 regular file
-Device: 801h/2049d Inode: 924555 Links: 1
-Access: (0644/-rw-r--r--) Uid: ( 1000/ tom) Gid: ( 1000/ tom) 
-Access: 2019-05-08 13:41:16.544000000 -0600
-Modify: 2019-05-08 12:50:44.112000000 -0600
-Change: 2019-05-08 12:50:44.112000000 -0600
-Birth: -
+elliot@ubuntu-linux:~$ mv hard.txt facts.txt
 ```
 
-The [stat] command doesn\'t just list the inode number of a file;
-it also lists all the file attributes as you can see from the command
-output.
-
-
-Creating soft links
-===================
-
-
-Now since you understand what a file inode is, you can easily understand
-the concept of hard and soft links. And let us start with soft links:
-
-
-**WHAT IS A SOFT LINK?**
-
-A soft link (also referred to as a symbolic link) is simply a file that
-points to another file.
-
-
-A picture is worth a thousand words, so the following diagram will help
-you visualize soft links.
-
-
-![](./images/5c7021dc-7ad5-478f-bebb-c9d4b98bfce4.png)
-
-
-
-
-
-To create a soft link, we use the [ln] command with the [-s]
-option as follows:
-
-``` 
-ln -s original_file soft_link
-```
-
-So to create a soft link named [soft.txt] to the [facts.txt]
-file, you can run the command [ln -s facts.txt soft.txt]:
-
-``` 
-elliot@ubuntu-linux:~$ ln -s facts.txt soft.txt
-```
-
-Now let\'s do a long listing on the soft link file [soft.txt] that
-we just created:
-
-``` 
-elliot@ubuntu-linux:~$ ls -l soft.txt
-lrwxrwxrwx 1 tom tom 9 May 8 21:48 soft.txt -> facts.txt
-```
-
-You will notice two things. First, the letter [l] in the first
-column of the output [lrwxrwxrwx], which signals that the file is
-a link (soft link), and secondly you can see the right arrow [soft.txt →
-facts.txt], which basically tells us that [soft.txt] is a
-soft link that points to the file [facts.txt].
-
-Now let\'s check the contents of the file [soft.txt]:
-
-``` 
-elliot@ubuntu-linux:~$ cat soft.txt 
-Apples are red.
-Grapes are green.
-Bananas are yellow.
-Cherries are red.
-Sky is high.
-Earth is round.
-Linux is awesome!
-Cherries are red.
-Cherries are red.
-Cherries are red.
-```
-
-Of course, it contains the same data that the original file
-[facts.txt] has. In fact, if you edit the soft link, it will
-actually edit the original file as well.
-
-To demonstrate, open the file [soft.txt] with any text editor and
-add the line \"Grass is green.\" at the very end of the file, and then
-save and exit so the contents of [soft.txt] will be as follows:
-
-``` 
-elliot@ubuntu-linux:~$ cat soft.txt 
-Apples are red.
-Grapes are green.
-Bananas are yellow.
-Cherries are red.
-Sky is high.
-Earth is round.
-Linux is awesome!
-Cherries are red.
-Cherries are red.
-Cherries are red.
-Grass is green.
-```
-
-Now let\'s check the contents of the original file [facts.txt]:
-
-``` 
-elliot@ubuntu-linux:~$ cat facts.txt 
-Apples are red.
-Grapes are green.
-Bananas are yellow.
-Cherries are red.
-Sky is high.
-Earth is round.
-Linux is awesome!
-Cherries are red.
-Cherries are red.
-Cherries are red.
-Grass is green.
-```
-
-As you can see, the new line \"Grass is green.\" is also there. That\'s
-because every time you edit a soft link, it actually edits the original
-file that it points to as well.
-
-Now if you delete the soft link, nothing will happen to the original
-file, it remains intact:
-
-``` 
-elliot@ubuntu-linux:~$ rm soft.txt 
-elliot@ubuntu-linux:~$ cat facts.txt
-Apples are red.
-Grapes are green.
-Bananas are yellow.
-Cherries are red.
-Sky is high.
-Earth is round.
-Linux is awesome!
-Cherries are red.
-Cherries are red.
-Cherries are red.
-Grass is green.
-```
-
-Now let\'s create the soft link [soft.txt] again:
-
-``` 
-elliot@ubuntu-linux:~$ ln -s facts.txt soft.txt
-```
-
-If you delete the original file [facts.txt], the soft link
-[soft.txt] will become useless! But before we delete the
-[facts.txt] file, let\'s make a copy of it in [/tmp] because
-we will need it later on:
-
-``` 
-elliot@ubuntu-linux:~$ cp facts.txt /tmp
-```
-
-Now let\'s delete the file [facts.txt] from [elliot]\'s home
-directory and see what happens to the soft link:
-
-``` 
-elliot@ubuntu-linux:~$ rm facts.txt 
-elliot@ubuntu-linux:~$ cat soft.txt 
-cat: soft.txt: No such file or directory
-```
-
-As you can see, the soft link [soft.txt] becomes useless as it\'s
-now pointing to nowhere. Keep in mind that the file [soft.txt]
-still exists, as shown in the following screenshot.
-
-
-![](./images/759134e1-46ab-4437-a780-5ea722dd2743.png)
-
-
-
-
-
-The following diagram shows you that the soft link [soft.txt]
-points to nowhere after the original file [facts.txt] has been
-deleted.
-
-
-![](./images/89d26240-3c13-4278-89ec-1221e6dfc693.png)
-
-
-
-
-
-Now if we moved [facts.txt] back to [elliot]\'s home
-directory:
-
-``` 
-elliot@ubuntu-linux:~$ mv /tmp/facts.txt /home/elliot
-```
-
-The soft link [soft.txt] will be useful again! You can say that we
-resurrected the soft link!
-
-``` 
-elliot@ubuntu-linux:~$ cat soft.txt 
-Apples are red.
-Grapes are green.
-Bananas are yellow.
-Cherries are red.
-Sky is high.
-Earth is round.
-Linux is awesome!
-Cherries are red.
-Cherries are red.
-Cherries are red.
-Grass is green.
-```
-
-Let\'s compare the inode numbers of the soft link [soft.txt] and
-the original file [facts.txt]:
-
-``` 
-elliot@ubuntu-linux:~$ ls -i soft.txt facts.txt 
-925155 facts.txt 924556 soft.txt
-```
-
-As you can see, the inode numbers of the two files are different.
-Finally, let\'s run the [stat] command on the soft link
-[soft.txt]:
-
-``` 
-elliot@ubuntu-linux:~$ stat soft.txt 
-File: soft.txt -> facts.txt
-Size: 9 Blocks: 0 IO Block: 4096 symbolic link
-Device: 801h/2049d Inode: 924556 Links: 1
-Access: (0777/lrwxrwxrwx) Uid: ( 1000/ tom) Gid: ( 1000/ tom) 
-Access: 2019-05-08 22:04:58.636000000 -0600
-Modify: 2019-05-08 22:02:18.356000000 -0600
-Change: 2019-05-08 22:02:18.356000000 -0600
-Birth: -
-```
-
-As you can see, it lists the file as a symbolic link, which is another
-name for a soft link.
-
-So as you have seen so far, a soft link has the following properties:
-
--   The inode of a soft link is different from the original file.
--   A soft link becomes useless once the original file is deleted.
--   Any change to the soft link is actually a change in the original
-    file.
--   You can create soft links to directories.
-
-You can create soft links to directories the same way you can create
-soft links to files. To demonstrate, let\'s first create a directory
-named [sports] in [elliot]\'s home directory. And inside
-[sports], create three files -- [swimming], [soccer],
-and [hockey] -- as follows:
-
-``` 
-elliot@ubuntu-linux:~$ mkdir sports
-elliot@ubuntu-linux:~$ touch sports/swimming sports/soccer sports/hockey 
-elliot@ubuntu-linux:~$ ls sports
-hockey soccer swimming
-```
-
-Now let\'s create a soft link named [softdir1] to the
-[sports] directory:
-
-``` 
-elliot@ubuntu-linux:~$ ln -s sports softdir1
-```
-
-Now if you change to [softdir1], you are actually changing to
-[sports], and so you will see the same directory contents:
-
-``` 
-elliot@ubuntu-linux:~$ cd softdir1 
-elliot@ubuntu-linux:~/softdir1$ ls 
-hockey soccer swimming
-```
-
-Of course, the same thing holds for directories as well; that is, if you
-delete the original directory, the soft link will become useless!
-
-
-Creating hard links
-===================
-
-
-The story is a little bit different when it comes to hard links. That\'s
-because a hard link is a replica of the original file. And here is a
-definition of a hard link:
-
-The following diagram helps you visualize hard links:
-
-
-![](./images/c7168626-7b5d-43b8-aa91-6cf509081302.png)
-
-
-We use the same [ln] command to create hard links, but this time
-we omit the [-s] option:
-
-``` 
-ln original_file hard_link
-```
-
-So to create a hard link named [hard.txt] to the file
-[facts.txt], you can simply run the command [ln facts.txt
-hard.txt]:
-
-``` 
-elliot@ubuntu-linux:~$ cd ~
-elliot@ubuntu-linux:~$ ln facts.txt hard.txt
-```
-
-Now let\'s do a long listing on the hard link [hard.txt] and the
-original file [facts.txt]:
-
-``` 
-elliot@ubuntu-linux:~$ ls -l hard.txt
--rw-rw-r-- 2 tom tom 210 May 9 00:07 hard.txt 
-elliot@ubuntu-linux:~$ ls -l facts.txt
--rw-rw-r-- 2 tom tom 210 May 9 00:07 facts.txt
-```
-
-They are identical! The hard link also has the same contents just like
-the original file:
-
-``` 
-elliot@ubuntu-linux:~$ cat hard.txt 
-Apples are red.
-Grapes are green.
-Bananas are yellow.
-Cherries are red.
-Sky is high.
-Earth is round.
-Linux is awesome!
-Cherries are red.
-Cherries are red.
-Cherries are red.
-Grass is green.
-```
-
-Now add the line \"Swimming is a sport.\" to the very end of the hard
-link [hard.txt] with the text editor of your choice:
-
-``` 
-elliot@ubuntu-linux:~$ cat hard.txt 
-Apples are red.
-Grapes are green.
-Bananas are yellow.
-Cherries are red.
-Sky is high.
-Earth is round.
-Linux is awesome!
-Cherries are red.
-Cherries are red.
-Cherries are red.
-Grass is green.
-Swimming is a sport.
-```
-
-Now just like in the case with soft links, the content of the original
-file has also changed:
-
-``` 
-elliot@ubuntu-linux:~$ cat facts.txt 
-Apples are red.
-Grapes are green.
-Bananas are yellow.
-Cherries are red.
-Sky is high.
-Earth is round.
-Linux is awesome!
-Cherries are red.
-Cherries are red.
-Cherries are red.
-Grass is green.
-Swimming is a sport.
-```
-
-Now let\'s check the inode numbers of both files:
-
-``` 
-elliot@ubuntu-linux:~ ls -i hard.txt facts.txt 
-925155 facts.txt 925155 hard.txt
-```
-
-Notice that both files have the same inode number. Now let\'s run the
-[stat] command on both files:
-
-``` 
-elliot@ubuntu-linux:~$ stat hard.txt facts.txt 
-File: hard.txt
-Size: 210 Blocks: 8 IO Block: 4096 regular file
-Device: 801h/2049d Inode: 925155 Links: 2
-Access: (0664/-rw-rw-r--) Uid: ( 1000/ elliot) Gid: ( 1000/ elliot) 
-Access: 2019-05-09 00:07:36.884000000 -0600
-Modify: 2019-05-09 00:07:25.708000000 -0600
-Change: 2019-05-09 00:07:25.720000000 -0600
-Birth: -
-File: facts.txt
-Size: 210 Blocks: 8 IO Block: 4096 regular file
-Device: 801h/2049d Inode: 925155 Links: 2
-Access: (0664/-rw-rw-r--) Uid: ( 1000/ elliot) Gid: ( 1000/ elliot)
-Access: 2019-05-09 00:07:36.884000000 -0600
-Modify: 2019-05-09 00:07:25.708000000 -0600
-Change: 2019-05-09 00:07:25.720000000 -0600
-Birth: -
-```
-
-The output of the [stat] command is identical for both files. And
-also, the number of [Links: 2] here means that there are two hard
-links to the file. Hmmm! We have only created one hard link to the file
-[facts.txt], then how come it listed two hard links? Well, the
-original file is a hard link to itself, and so any file has a minimum of
-one hard link (itself).
-
-Now unlike the case with soft links, if you delete the original file
+Now let\'s use the [head] command to view the first five lines of
 [facts.txt]:
 
 ``` 
-elliot@ubuntu-linux:~$ rm facts.txt
-```
-
-The hard link remains intact:
-
-``` 
-elliot@ubuntu-linux:~$ cat hard.txt 
+elliot@ubuntu-linux:~$ head -n 5 facts.txt 
 Apples are red.
 Grapes are green.
 Bananas are yellow.
 Cherries are red.
 Sky is high.
-Earth is round.
-Linux is awesome!
-Cherries are red.
-Cherries are red.
-Cherries are red.
-Grass is green.
-Swimming is a sport.
 ```
 
-The following diagram shows you why the hard link remains intact.
+Now I want to display only the fifth line [Sky is high.] of the
+file [facts.txt]; how can I do that?
 
-
-![](./images/8d1e3e59-0942-4414-a8c1-346adcc61619.png)
-
-
-
-
-
-Now notice that after the removal of the file [facts.txt], the
-number of hard links count of the file [hard.txt] will decrease to
-one:
+That\'s where the power of Linux pipes comes into play. If you pipe the
+output of the previous command to the [tail -n 1] command, you
+will get the fifth line:
 
 ``` 
-elliot@ubuntu-linux:~$ stat hard.txt 
-File: hard.txt
-Size: 210 Blocks: 8 IO Block: 4096 regular file
-Device: 801h/2049d Inode: 925155 Links: 1
-Access: (0664/-rw-rw-r--) Uid: ( 1000/ elliot) Gid: ( 1000/ elliot) 
-Access: 2019-05-09 00:17:21.176000000 -0600
-Modify: 2019-05-09 00:07:25.708000000 -0600
-Change: 2019-05-09 00:17:18.696000000 -0600
-Birth: -
+elliot@ubuntu-linux:~$ head -n 5 facts.txt | tail -n 1 
+Sky is high.
 ```
 
-You can\'t create a hard link to a directory. If you don\'t believe me,
-then try creating a hard link named [variables] to the
-[/var] directory:
+So by using a pipe, I was able to send the output of the command [head
+-n 5 facts.txt] to the input (argument) of the command [tail -n
+1].
+
+Let\'s do another example. If you want to display the seventh line of
+the file [facts.txt], then you will show the first seven lines
+using the [head] command, then use a pipe to [tail] the last
+line:
 
 ``` 
-elliot@ubuntu-linux:~$ ln /var variables
-ln: /var: hard link not allowed for directory
+elliot@ubuntu-linux:~$ head -n 7 facts.txt | tail -n 1 
+Linux is awesome
 ```
+
+You can also use more than one pipe at a time as demonstrated in the
+following diagram:
+
+
+![](./images/1c680413-5616-47e0-a572-bc2fdd212cd8.png)
+
+
+
+For example, you already know that the [lscpu] command displays
+your processor information. The fourth line of the [lscpu] command
+output shows how many CPUs your machine has. You can display the fourth
+line of the [lscpu] command by using two pipes:
+
+``` 
+elliot@ubuntu-linux:~$ lscpu | head -n 5 | tail -n 1 
+CPU(s):       4
+```
+
+So let\'s break down what happened here. The first pipe we used was to
+show the first four lines of the [lscpu] command:
+
+``` 
+elliot@ubuntu-linux:~$ lscpu | head -n 5 
+
+Architecture:                    x86_64
+CPU op-mode(s):                  32-bit, 64-bit
+Byte Order:                      Little Endian
+Address sizes:                   40 bits physical, 48 bits virtual
+CPU(s):                          4
+```
+
+We then used the second pipe to [tail] the last line, which gets
+us the fourth line in this case:
+
+``` 
+elliot@ubuntu-linux:~$ lscpu | head -n 5 | tail -n 1 
+CPU(s):        4
+```
+
+You can similarly display the second line of [lscpu], which shows
+your CPU operation modes, but I will leave that for you to do as an
+exercise.
+
+
+Input and output redirection
+============================
+
+
+In this section, you will get to learn one of the coolest Linux
+features, which is I/O (input/output) redirection. Most Linux commands
+work with three different streams of data:
+
+-   Standard input (also referred to as [stdin])
+-   Standard output (also referred to as [stdout])
+-   Standard error (also referred to as [stderr])
+
+
+Redirecting standard output
+===========================
+
+
+You know that running the [date] command will display the current
+date on your terminal:
+
+``` 
+elliot@ubuntu-linux:~$ date 
+Wed Mar 15 11:50:13 UTC 2023
+```
+
+Now by using the greater than sign [\>], you can redirect the
+output of the [date] command to a file instead of your terminal!
+Have a look:
+
+``` 
+elliot@ubuntu-linux:~$ date > mydate.txt
+```
+
+As you can see, there is no output displayed on your screen! That\'s
+because the output got redirected to the file [mydate.txt]:
+
+``` 
+elliot@ubuntu-linux:~$ cat mydate.txt 
+Sat May 11 06:04:49 CST 2019
+```
+
+Cool! Let\'s try some more examples. You can print a line on your
+terminal with the [echo] command:
+
+``` 
+elliot@ubuntu-linux:~$ echo "Mars is a planet." 
+Mars is a planet.
+```
+
+If you want to redirect the output to a file named [planets.txt],
+you can run the command:
+
+``` 
+elliot@ubuntu-linux:~$ echo "Mars is a planet." > planets.txt 
+elliot@ubuntu-linux:~$ cat planets.txt
+Mars is a planet
+```
+
+Awesome! Notice that the file [planets.txt] was also created in
+the process. Now let\'s add more planets to the file
+[planets.txt]:
+
+``` 
+elliot@ubuntu-linux:~$ echo "Saturn is a planet." > planets.txt 
+elliot@ubuntu-linux:~$ cat planets.txt
+Saturn is a planet.
+```
+
+Hmmm. We added the line \"Saturn is a planet.\" but the line \"Mars is a
+planet.\" is now removed! That\'s because redirecting standard output
+with [\>] overwrites the file. What we need in this case is to
+append to the file and this can be done by using a double greater than
+sign [\>\>]. So now let\'s append the line \"Mars is a planet.\"
+back to the file [planets.txt]:
+
+``` 
+elliot@ubuntu-linux:~$ echo "Mars is a planet." >> planets.txt 
+elliot@ubuntu-linux:~$ cat planets.txt
+Saturn is a planet.
+Mars is a planet.
+```
+
+Great! As you can see, it added the line \"Mars is a planet.\" to the
+end of the file. Let\'s append one more planet:
+
+``` 
+elliot@ubuntu-linux:~$ echo "Venus is a planet." >> planets.txt 
+elliot@ubuntu-linux:~$ cat planets.txt
+Saturn is a planet.
+Mars is a planet.
+Venus is a planet.
+```
+
+Awesome! One more thing you need to know here is that the standard
+output ([stdout]) is linked to file descriptor 1.
+
+
+**WHAT IS A FILE DESCRIPTOR?**
+
+A file descriptor is a number that uniquely identifies an open file in a
+computer\'s operating system.
+
+
+And so running the command:
+
+``` 
+elliot@ubuntu-linux:~$ date > mydate.txt
+```
+
+Is the same as running the command:
+
+``` 
+elliot@ubuntu-linux:~$ date 1> mydate.txt
+```
+
+Notice that the [1] in [1\>] references file descriptor 1
+([stdout]).
+
+
+Redirecting standard error
+==========================
+
+
+You will get an error message if you try to display the contents of a
+file that doesn\'t exist:
+
+``` 
+elliot@ubuntu-linux:~$ cat blabla 
+cat: blabla: No such file or directory
+```
+
+Now, this error message comes from standard error ([stderr]). If
+you try to redirect errors the same way we did with the standard output,
+it will not work:
+
+``` 
+elliot@ubuntu-linux:~$ cat blabla > error.txt 
+cat: blabla: No such file or directory
+```
+
+As you can see, it still displays the error message on your terminal.
+That\'s because [stderr] is linked to file descriptor 2. And thus,
+to redirect errors, you have to use [2\>]:
+
+``` 
+elliot@ubuntu-linux:~$ cat blabla 2> error.txt
+```
+
+Now if you displayed the contents of the file [error.txt], you
+would see the error message:
+
+``` 
+elliot@ubuntu-linux:~$ cat error.txt 
+cat: blabla: No such file or directory
+```
+
+Let\'s try to remove a file that doesn\'t exist:
+
+``` 
+elliot@ubuntu-linux:~$ rm brrrr
+rm: cannot remove 'brrrr': No such file or directory
+```
+
+This also produces an error message. We can append this error message to
+the file\
+[error.txt] using [2\>\>]:
+
+``` 
+elliot@ubuntu-linux:~$ rm brrrr 2>> error.txt
+```
+
+Now if you display the contents of the file [error.txt]:
+
+``` 
+elliot@ubuntu-linux:~$ cat error.txt 
+cat: blabla: No such file or directory
+rm: cannot remove 'brrrr': No such file or directory
+```
+
+You will see both error messages.
+
+
+Redirecting all output to the same file
+=======================================
+
+
+There are some situations where you can get both standard output and an
+error message at the same time. For example, if you run the following
+command:
+
+``` 
+elliot@ubuntu-linux:~$ cat planets.txt blabla 
+Saturn is a planet.
+Mars is a planet.
+Venus is a planet.
+cat: blabla: No such file or directory
+```
+
+You will see that it displayed the contents of the file
+[planets.txt], but it also displayed an error message at the very
+last line (because there is no file [blabla] to concatenate).
+
+You can choose to redirect the error to another file:
+
+``` 
+elliot@ubuntu-linux:~$ cat planets.txt blabla 2> err.txt 
+Saturn is a planet.
+Mars is a planet.
+Venus is a planet.
+```
+
+This way, you only see the standard output on the screen. Or you may
+choose to redirect the standard output:
+
+``` 
+elliot@ubuntu-linux:~$ cat planets.txt blabla 1> output.txt 
+cat: blabla: No such file or directory
+```
+
+This way, you only see the error on the screen. Now, what if you want to
+redirect both the standard output and the error to the same file? In
+this case, you have to run:
+
+``` 
+elliot@ubuntu-linux:~$ cat planets.txt blabla > all.txt 2>&1
+```
+
+[&1] is referencing the standard output while [2\>] is
+referencing the standard error. So what we are basically saying here is:
+\"Redirect the stderr to the same place we are redirecting the stdout.\"
+
+Now if you displayed the contents of the file [all.txt]:
+
+``` 
+elliot@ubuntu-linux:~$ cat all.txt 
+Saturn is a planet.
+Mars is a planet.
+Venus is a planet.
+cat: blabla: No such file or directory
+```
+
+You can see it includes both the [stdout] and [stderr].
+
+
+Discarding output
+=================
+
+
+Sometimes you don\'t need to redirect output to anywhere; you just want
+to throw it away and get rid of it. In this case, you can redirect the
+output to [/dev/null]. This is often used with error messages. For
+example:
+
+``` 
+elliot@ubuntu-linux:~$ cat planets.txt blabla 2> /dev/null 
+Saturn is a planet.
+Mars is a planet.
+Venus is a planet.
+```
+
+This will redirect the error message to [/dev/null]. You can think
+of [/dev/null] as a garbage collector.
+
+
+Redirecting standard input
+==========================
+
+
+Some Linux commands interact with the user input through the standard
+input (which is your keyboard by default). For example, the [read]
+command reads input from the user and stores it in a variable. For
+example, you can run the command [read weather]:
+
+``` 
+elliot@ubuntu-linux:~$ read weather 
+It is raining.
+```
+
+It will then wait for you to enter a line of text. I entered the line
+[It is raining.] and so it stored the line in the [weather]
+variable. You can use the [echo] command to display the contents
+of a variable:
+
+``` 
+elliot@ubuntu-linux:~$ echo $weather 
+It is raining.
+```
+
+Notice that you have to precede the variable name with a dollar sign.
+The [read] command is particularly useful in shell scripts, which
+we will cover later on. Now notice I wrote the line [It is
+raining.] using my keyboard. However, I can redirect standard
+input to come from a file instead using the less-than sign [\<],
+for example:
+
+``` 
+elliot@ubuntu-linux:~$ read message < mydate.txt
+```
+
+This will read the contents of the file [mydate.txt] and store it
+in the [message] variable:
+
+``` 
+elliot@ubuntu-linux:~$ echo $message 
+Wed Mar 15 11:51:49 UTC 2023
+```
+
+As you can see, the variable [message] now has the same contents
+as the file [my- date.txt].
 
 
 Knowledge check
 ===============
 
 
-For the following exercises, open up your Terminal and try to solve the
+For the following exercises, open up your terminal and try to solve the
 following tasks:
 
-1.  Display the inode number of the [/var/log] directory.
-2.  Display the number of hard links for the [/boot] directory.
-3.  Create a new directory named [coins] in your home directory.
-4.  Create a soft link to [coins] named [currency].
-5.  Inside the [coins] directory, create two files --
-    [silver] and [gold].
-6.  Create a new file [bronze] inside [currency].
-7.  List the contents of both directories -- [coins] and
-    [currency].
-8.  Create a new file [beverages] with the line \"coffee is
-    awesome\" in your home directory and create a hard link named
-    [drinks] to [beverages].
-9.  Add the line \"lemon is refreshing\" to the [drinks] file and
-    then remove the [beverages] file.
-10. Display the contents of your [drinks] file.
-
-True or false
--------------
-
-1.  The **File Name** is a part of the inode data structure.
-2.  The **File Size** is a part of the inode data structure.
-3.  You can create soft links to directories.
-4.  You can create hard links to directories.
-5.  The minimum number of hard links for a directory is [2].
-6.  Soft links have the same inode number as the original file.
-7.  Hard links have the same inode number as the original file.
+1.  Display only the *5th* line of the file [facts.txt].
+2.  Save the output of the [free] command into a file named
+    [system.txt].
+3.  Append the output of the [lscpu] command to the file
+    [system.txt].
+4.  Run the command [rmdir /var] and redirect the error message to
+    the file [error.txt].

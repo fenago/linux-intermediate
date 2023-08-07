@@ -1,262 +1,271 @@
 
-Lab: File Processing Utilities: Find/Locate Files
---------------------------------------------------
-
-In this lab, you will learn two different ways you can use to search and locate files.
+Lab: Multitasking and Batch Processing: Cron
+============================================
 
 
-The locate command
+In this lab, you will learn how to automate boring tasks in Linux by
+using cron jobs, which is one of the most useful and powerful utilities
+in Linux. Thanks to cron jobs, Linux system administrators can rest on
+the weekend and enjoy their vacation with their beloved ones. Cron jobs
+allow you to schedule tasks to run at a specific time. With cron jobs,
+you can schedule to run backups, monitor system resources, and much
+more.
+
+Make sure to start cron service before starting the lab:
+
+```
+service cron start
+
+service cron status
+```
+
+![](./images/16.png)
+
+
+Our first cron job
+==================
+
+The following diagram shows you the typical format for a cron job:
+
+
+![](./images/8c4892ca-b99d-4714-aa7d-7ef9863d0820.png)
+
+
+Cron jobs are user-specific, and so each user has their own list of cron
+jobs. For example, the user [elliot] can run the command [crontab
+-l] to display his their of cron jobs:
+
+``` 
+elliot@ubuntu-linux:~$ crontab -l 
+no crontab for elliot
+```
+
+Currently, the user [elliot] doesn\'t have any cron jobs.
+
+Let\'s go ahead and create Elliot\'s first cron job. We will create a
+cron job that will run every minute, and it will simply append the line
+\"A minute has passed.\" to the file [/home/elliot/minutes.txt].
+
+You can run the command [crontab -e] to edit or create cron jobs:
+
+``` 
+elliot@ubuntu-linux:~$ crontab -e
+```
+
+Now add the following line and then save and exit:
+
+``` 
+* * * * * echo "A minute has passed." >> /home/elliot/minutes.txt
+```
+
+After you exit, you will see the message: \"crontab: installing new
+crontab\":
+
+``` 
+elliot@ubuntu-linux:~$ crontab -e 
+crontab: installing new crontab
+```
+
+Finally, the user [elliot] can list their cron jobs to verify that
+the new cron job is scheduled:
+
+``` 
+elliot@ubuntu-linux:~$ crontab -l
+* * * * * echo "A minute has passed." >> /home/elliot/minutes.txt
+```
+
+Now, wait for a few minutes and then check the contents of the file
+[/home/elliot/minutes.txt]:
+
+``` 
+elliot@ubuntu-linux:~$ cat /home/elliot/minutes.txt 
+A minute has passed.
+A minute has passed. 
+A minute has passed. 
+A minute has passed. 
+A minute has passed.
+```
+
+I waited five minutes, and then I viewed the file to see that the line
+\"A minute has passed.\" was added five times to the file
+[minutes.txt], so I know the cron job is working fine.
+
+
+Run every five minutes
+======================
+
+
+Let\'s create another cron job that will run every five minutes. For
+example, you may want to create a cron job that checks the load average
+on your system every five minutes.
+
+Run the command [crontab -e] to add a new cron job:
+
+``` 
+elliot@ubuntu-linux:~$ crontab -e
+```
+
+Now add the following line and then save and exit:
+
+``` 
+*/5 * * * * uptime >> /home/elliot/load.txt
+```
+
+Finally, let\'s view the list of installed cron jobs to verify that the
+new cron job is scheduled:
+
+``` 
+elliot@ubuntu-linux:~$ crontab -e 
+crontab: installing new crontab 
+elliot@ubuntu-linux:~$ crontab -l
+* * * * * echo "A minute has passed" >> /home/elliot/minutes.txt
+*/5 * * * * uptime >> /home/elliot/load.txt
+```
+
+Now we can see there are two cron jobs installed for the user
+[elliot].
+
+Hang around for five or ten minutes and then check the contents of the
+file [/home/elliot/load.txt]. If you don\'t have a stopwatch, run
+the command [sleep 300] and wait until it finishes:
+
+``` 
+elliot@ubuntu-linux:~$ sleep 300
+```
+
+I made myself some green tea, and then came back after ten minutes and
+viewed the file [/home/elliot/load.txt]:
+
+``` 
+elliot@ubuntu-linux:~$ cat /home/elliot/load.txt
+14:40:01 up 1 day, 5:13, 2 users, load average: 0.41, 0.40, 0.37
+14:45:01 up 1 day, 5:18, 2 users, load average: 0.25, 0.34, 0.35
+```
+
+The cron job ran twice in those ten minutes as expected; I recommend you
+check the file [/home/elliot/load.txt] again in twenty-four hours,
+and you will see a pretty lovely report for your system load average
+throughout the day.
+
+
+More cron examples
 ==================
 
 
-If you know the name of your file but you are unsure of the file's
-location, you can use the [locate] command to get the file's path.
+You can also schedule your cron job to run at multiple time intervals.
+For example, the following cron job will run every hour on Sunday at the
+minutes [5], [20], and [40]:
 
-The [locate] command searches for a file location in a prebuilt
-file database, and thus it's crucial to update the file database before
-using the [locate] command. If you don't update the database, the
-[locate] command may fail to retrieve the location of newly
-created files.
+``` 
+5,20,40 * * * sun task-to-run
+```
+
+You can also specify a time range. For example, a cron job that will run
+at [6:30] PM on [weekdays] (Monday -\> Friday) will have the
+following format:
+
+``` 
+30 18 * * 1-5 task-to-run
+```
+
+Notice that [0] is Sunday, [1] is Monday, and so on.
 
 
-Updating the file database
+Automating system patching
 ==========================
 
 
-To update the file database, you have to run the [updatedb]
-command as the root user:
+As a Linux system administrator, you get to patch (update) systems quite
+often. And sometimes, it may drive you insane as production servers are
+scheduled to update at unpleasant times, like midnight on the weekends,
+[04:00] AM, [02:00] AM, etc. It would be nice to automate
+such a hectic task and get more sleep, right?
+
+Let\'s switch to the [root] user and then create a bash script
+named [auto\_patch.sh]
+
+in [/root]:
 
 ``` 
-root@ubuntu-linux:~# updatedb
+root@ubuntu-linux:~# cat auto_patch.sh 
+#!/bin/bash
+apt-get -y update 
+apt-get -y upgrade 
 ```
 
-The [updatedb] command will not display any output.
+Notice that the script [auto\_patch.sh] is tiny; only three lines.
+We have used the\
+[-y] option with the [apt-get] commands, which automatically
+answers [Yes] to all prompts during the system update; this is
+important because you will not be sitting in front of the computer while
+the script is running!
 
-Now, let's say we forgot the location of the file [facts.txt], and
-we don't remember where it is; in this case, you can run the
-[locate] command followed by the filename:
+Now make the script executable:
 
 ``` 
-root@ubuntu-linux:~# locate facts.txt
-/home/elliot/facts.txt
+root@ubuntu-linux:~# chmod +x auto_patch.sh
 ```
 
-BOOM! It displayed the location of the file [facts.txt].
-
-Now I will show you what will happen if you search for a newly created
-file without updating the file database.
-
-Create an empty file named [ghost.txt] in the [/home]
-directory:
+Finally, you need to schedule a cron job to run the
+[auto\_patch.sh] script. Let\'s assume the system is scheduled to
+update on Saturday at 01:00 AM. In this case, you can create the
+following cron job:
 
 ``` 
-root@ubuntu-linux:/# touch /home/ghost.txt
+0 1 * * sat /root/auto_patch.sh
 ```
 
-Now try searching for the file [ghost.txt]:
+Keep in mind that [auto\_patch.sh] will never be deployed on any
+real server. I was only opening your mind to the concept of automation.
+You need to edit [auto\_patch.sh] to check for command exit codes
+as it\'s naive to expect that everything will go smoothly without any
+errors. A good system administrator always creates robust scripts that
+handle all kinds of expected errors.
+
+
+Running a job once
+==================
+
+
+You have to remove the [auto\_patch.sh] cron job sometime after it
+runs, or else it will keep updating the system every week! For this,
+there exists another utility called [at] for that sole purpose;
+that is, to schedule to run a job just once.
+
+We first need to install the [at] package:
 
 ``` 
-root@ubuntu-linux:/# locate ghost.txt 
-root@ubuntu-linux:/#
+root@ubuntu-linux:~# apt-get -y install at
+
+root@ubuntu-linux:~# service atd start
+
+root@ubuntu-linux:~# service atd status
 ```
 
-The [locate] command couldn't find it! Why is that?\...\.....
-That's because you created a new file, and the file database doesn't
-know about it yet. You have to run the [updatedb] command first to
-update the file database:
+![](./images/17.png)
+
+Now you can schedule to run the [auto\_patch.sh] script this
+coming Saturday at [01:00] AM with the following command:
 
 ``` 
-root@ubuntu-linux:/# updatedb 
-root@ubuntu-linux:/# locate ghost.txt
-/home/ghost.txt
+root@ubuntu-linux:~# at 01:00 AM Sat -f /root/auto_patch.sh
 ```
 
-YES! After you update the file database, the [locate] command can
-now get the location of the file [ghost.txt].
-
-You can also use wildcards with the [locate] command. For example,
-[locate \*.log] will search for all the log files in your system.
-You can also use the [-r] option to enable [regex] in your
-search.
-
-
-The find command
-================
-
-To search for all the [.txt] files under your
-[/home] directory, you can run:
-
-``` 
-root@ubuntu-linux:~# find /home -name "*.txt"
-/home/elliot/facts2.txt
-/home/elliot/dir1/directory2/file1.txt
-/home/elliot/dir1/directory2/file3.txt
-/home/elliot/dir1/directory2/file2.txt
-/home/elliot/soft.txt
-/home/elliot/facts.txt
-/home/elliot/practise.txt
-/home/elliot/upper.txt
-/home/elliot/mydate.txt
-/home/elliot/all.txt
-/home/elliot/Mars.txt
-/home/elliot/output.txt
-/home/elliot/planets.txt
-/home/elliot/error.txt
-/home/elliot/animals.txt
-/home/ghost.txt
-```
-
-The [-name] option searches for filename; there are many other
-options you can use with the [find] command.\
-The [-type] option searches for file type; for example, to search
-for all the directories in [/home/elliot/dir1], you can run:
-
-``` 
-root@ubuntu-linux:~# find /home/elliot/dir1 -type d
-/home/elliot/dir1
-/home/elliot/dir1/cities
-/home/elliot/dir1/directory2
-```
-
-Notice it only listed the directories in [/home/elliot/dir1]. To
-list regular files instead, you can run:
-
-``` 
-root@ubuntu-linux:~# find /home/elliot/dir1 -type f
-/home/elliot/dir1/cities/paris
-/home/elliot/dir1/cities/london
-/home/elliot/dir1/cities/berlin
-/home/elliot/dir1/directory2/file1.txt
-/home/elliot/dir1/directory2/file3.txt
-/home/elliot/dir1/directory2/file2.txt
-```
-
-To search for both regular files and directories, you can use a comma:
-
-``` 
-root@ubuntu-linux:~# find /home/elliot/dir1 -type d,f
-/home/elliot/dir1
-/home/elliot/dir1/cities
-/home/elliot/dir1/cities/paris
-/home/elliot/dir1/cities/london
-/home/elliot/dir1/cities/berlin
-/home/elliot/dir1/directory2
-/home/elliot/dir1/directory2/file1.txt
-/home/elliot/dir1/directory2/file3.txt
-/home/elliot/dir1/directory2/file2.txt
-```
-
-Now as the root user create the two files [large.txt] and
-[LARGE.TXT] in [/root]:
-
-``` 
-root@ubuntu-linux:~# touch large.txt LARGE.TXT
-```
-
-Let's say you forgot where these two files are located; in this case,
-you can use [/] as your starting-point:
-
-``` 
-root@ubuntu-linux:~# find / -name large.txt
-/root/large.txt
-```
-
-Notice it only listed the location of [large.txt]. What if you
-wanted the other file [LARGE.TXT] as well? In this case, You can
-use the [-iname] option, which makes the search case insensitive:
-
-``` 
-root@ubuntu-linux:~# find / -iname large.txt
-/root/LARGE.TXT
-/root/large.txt
-```
-
-Let's append the line \"12345\" to the file [large.txt]:
-
-``` 
-root@ubuntu-linux:~# echo 12345 >> large.txt
-```
-
-Notice the size of the files [large.txt] and [LARGE.txt]:
-
-``` 
-root@ubuntu-linux:~# du -b large.txt LARGE.TXT
-6 large.txt
-0 LARGE.TXT
-```
-
-The file [LARGE.TXT] is zero bytes in size because it's empty. You
-can use the [-size] option to search for files based on their
-size.
-
-For example, to search for empty files under the [/root]
-directory, you can run the command:
-
-``` 
-root@ubuntu-linux:~# find /root -size 0c
-/root/LARGE.TXT
-```
-
-As you can see, it listed [LARGE.TXT] as it has zero characters;
-[0c] means zero characters (or bytes). Now, if you want to search
-for files of size [6] bytes under [/root], you can run:
-
-``` 
-root@ubuntu-linux:~# find /root -size 6c
-/root/large.txt
-```
-
-As you can see, it listed the file [large.txt].
-
-You can even use size ranges in your search; Below table shows you
-some examples of using size ranges with the [find] command.
-
-![](./images/13.png)
-
-The [-mtime] and [-atime] options search for files based on
-modification and access times. The [-exec] is also a useful
-command option that allows you to run another command on the
-[find] results.
-
-For example, you can do a long-listing on all the empty files in
-[/root] by running the command:
-
-``` 
-root@ubuntu-linux:~# find /root -size 0c -exec ls -l {} +
--rw-r--r-- 1 root root 0 May 16 14:31 /root/LARGE.TXT
-```
-
-A lot of people forget to include [{} +] when using the
-[-exec] option; [{} +] references all the files that are
-found in the find results.
-
-You can use any command you want with the [-exec] option. For
-example, instead of long-listing, you may want to remove the files you
-get from the find results. In this case, you can run:
-
-``` 
-root@ubuntu-linux:~# find /root -size 0c -exec rm {} +
-```
-
-Now the file [LARGE.TXT] is removed:
-
-``` 
-root@ubuntu-linux:~# ls -l LARGE.TXT
-ls: cannot access 'LARGE.TXT': No such file or directory
-```
+Remember, [at] jobs only run once, so after Saturday, the
+[auto\_patch.sh] script will not run again.
 
 
 Knowledge check
 ===============
 
 
-For the following exercises, open up your Terminal and try to solve the
+For the following exercises, open up your terminal and try to solve the
 following tasks:
 
-1.  Use the [locate] command to find the path of the file
-    [boot.log].
-2.  Find all the files that are bigger than [50] MB in size.
-3.  Find all the files that are between [70] MB and [100] MB
-    in size.
-4.  Find all the files that are owned by the user [smurf].
-5.  Find all the files that are owned by the group [developers].
+1.  Create a cron job for the root user that will run every 10 minutes.
+    The cron job will simply append the line \"10 minutes have passed!\"
+    to the file [/root/minutes.txt].
+2.  Create a cron job for the root user that will run every Christmas
+    ([25th of December at 1 AM]). The cron job will simply append
+    the line \"Merry Christmas!\" to the file
+    [/root/holidays.txt].

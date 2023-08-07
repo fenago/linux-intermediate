@@ -1,842 +1,1009 @@
+Lab: Shell Programming
+======================
 
-Lab: File Processing Utilities: Examining and Comparing Files
-=============================================================
-
-
-In this lab, you will learn various Linux commands that will help
-you analyze and manipulate files. You will learn how to compare two
-files and get the file size. You will also learn how to reveal the type
-of a file and display the number of characters, words, and lines in a
-file. Furthermore, you will learn how to sort files, remove duplicate
-lines, and much more!
+To complete a specific task in Linux, you will often find yourself
+running the same set of commands over and over again. This process can
+waste a lot of your precious time. In this lab, you will learn how
+to create bash scripts so that you can be much more efficient in Linux.
 
 
-Spot the difference
-===================
+Creating simple scripts
+=======================
 
 
-You can use the [diff] command to compare the contents of two
-files and highlight the differences between them.
-
-To demonstrate, let's first make a copy of the file [facts.txt]
-named [facts2.txt]:
+Our first bash script will be a simple script that will output the line
+\"Hello Friend!\" to the screen. In Elliot\'s home directory, create a
+file named [hello.sh] and insert the following two lines:
 
 ``` 
-elliot@ubuntu-linux:~$ cp facts.txt facts2.txt
+elliot@ubuntu-linux:~$ cat hello.sh 
+#!/bin/bash
+echo "Hello Friend!"
 ```
 
-Now let's append the line [\"Brazil is a country.\"] to the file
-[facts2.txt]:
+Now we need to make the script executable:
 
 ``` 
-elliot@ubuntu-linux:~$ echo "Brazil is a country." >> facts2.txt
+elliot@ubuntu-linux:~$ chmod a+x hello.sh
 ```
 
-Now, run the [diff] command on both files:
+And finally, run the script:
 
 ``` 
-elliot@ubuntu-linux:~$ diff facts.txt facts2.txt 
-12a13
-> Brazil is a country.
+elliot@ubuntu-linux:~$ ./hello.sh 
+Hello Friend!
 ```
 
-Cool! It outputs the difference between the two files, which in this
-case, is the line [Brazil is a country.]
+Congratulations! You have now created your first bash script! Let\'s
+take a minute here and discuss a few things; every bash script must do
+the following:
+
+-   [\#!/bin/bash]
+-   Be executable
+
+You have to insert [\#!/bin/bash] at the first line of any bash
+script; the character sequence [\#!] is referred to as a shebang
+or hashbang and is followed by the path of the bash shell.
 
 
-Viewing file size
+The PATH variable
 =================
 
 
-You can use the [du] command to view file size. **du** stands for
-**disk usage**. If you want to see how many bytes are in a file, you can
-run the [du] command with the [-b] option:
+You may have noticed that I used [./hello.sh] to run the script;
+you will get an error if you omit the leading [./]:
 
 ``` 
-elliot@ubuntu-linux:~$ du -b facts.txt
-210 facts.txt
+elliot@ubuntu-linux:~$ hello.sh 
+hello.sh: command not found
 ```
 
-The [facts.txt] file has [210] bytes. One character is equal
-to one byte in size, so now you know that the [facts.txt] file has
-exactly [210] characters.
+The shell can\'t find the command [hello.sh]. When you run a
+command on your terminal, the shell looks for that command in a set of
+directories that are stored in the [PATH] variable.
 
-You can also use the [-h] option, which will print the file size
-in a human-readable format. For example, to view the size of the
-[dir1] directory and its contents, you can run:
+You can use the [echo] command to view the contents of your
+[PATH] variable:
 
 ``` 
-elliot@ubuntu-linux:~$ du -h dir1 
-4.0K     dir1/cities
-16K     dir1/directory2 
-24K     dir1
+elliot@ubuntu-linux:~$ echo $PATH
+/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ```
 
-
-Counting characters, words, and lines
-=====================================
-
-
-The word count [wc] command is yet another very handy command. It
-counts the number of lines, words, and characters in a file. For
-example, to display the number of lines in the file [facts.txt],
-you can use the [-l] option:
+The colon character separates the path of each of the directories. You
+don\'t need to include the full path of any command or script (or any
+executable) that resides in these directories. All the commands you have
+learned so far reside in [/bin] and [/sbin], which are both
+stored in your [PATH] variable. As a result, you can run the
+[pwd] command:
 
 ``` 
-elliot@ubuntu-linux:~$ wc -l facts.txt
-12 facts.txt
+elliot@ubuntu-linux:~$ pwd
+/home/elliot
 ```
 
-There are a total of [12] lines in the file [facts.txt]. To
-display the number of words, you can use the [-w] option:
+There is no need to include its full path:
 
 ``` 
-elliot@ubuntu-linux:~$ wc -w facts.txt
-37 facts.txt
+elliot@ubuntu-linux:~$ /bin/pwd
+/home/elliot
 ```
 
-So there is a total of [37] words in the file [facts.txt].
-To display the number of characters (bytes), you can use the [-c]
-option:
+The good news is that you can easily add a directory to your
+[PATH] variable. For example, to add [/home/elliot] to your
+[PATH] variable, you can use the [export] command as
+follows:
 
 ``` 
-elliot@ubuntu-linux:~$ wc -c facts.txt
-210 facts.txt
+elliot@ubuntu-linux:~$ export PATH=$PATH:/home/elliot
 ```
 
-There is a total of [210] characters in the file
-[facts.txt]. Without any options, the [wc] command will
-display the number of lines, words, and characters side by side:
+Now you don\'t need the leading [./] to run the [hello.sh]
+script:
 
 ``` 
-elliot@ubuntu-linux:~$ wc facts.txt
-12 37 210 facts.txt
+elliot@ubuntu-linux:~$ hello.sh 
+Hello Friend!
 ```
 
-
-Viewing the file type
-=====================
-
-
-You can determine a file's type by using the [file] command. For
-example, if you want to determine the type of the file [/var], you
-can run:
+It will run because the shell is now looking for executable files in the
+[/home/elliot] directory as well:
 
 ``` 
-elliot@ubuntu-linux:~$ file /var
-/var: directory
+elliot@ubuntu-linux:~$ echo $PATH
+/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/elliot
 ```
 
-And as you would expect, the output shows that [/var] is a
-directory. If you want to show the type of the [facts.txt] file,
-you can run:
+Alright! Now let\'s create a few more bash scripts. We will create a
+script named [hello2.sh] that prints out \"Hello Friend!\" then
+displays your current working directory:
 
 ``` 
-elliot@ubuntu-linux:~$ file facts.txt 
-facts.txt: ASCII text
+elliot@ubuntu-linux:~$ cat hello2.sh 
+#!/bin/bash
+echo "Hello Friend!" 
+pwd
 ```
 
-The output shows that [facts.txt] is an ASCII text file.
-
-Now let's create a soft link named [soft.txt] to the
-[facts.txt] file:
+Now let\'s run it:
 
 ``` 
-elliot@ubuntu-linux:~$ ln -s facts.txt soft.txt
+elliot@ubuntu-linux:~$ hello2.sh
+-bash: /home/elliot/hello2.sh: Permission denied
 ```
 
-And run the [file] command on [soft.txt]:
+Shoot! I forgot to make it executable:
 
 ``` 
-elliot@ubuntu-linux:~$ file soft.txt 
-soft.txt: symbolic link to facts.txt
+elliot@ubuntu-linux:~$ chmod a+x hello2.sh 
+elliot@ubuntu-linux:~$ ./hello2.sh
+Hello Friend!
+/home/elliot
 ```
 
-As you can see, it shows that [soft.txt] is a symbolic (soft) link
-to [facts.txt].
+
+Reading user input
+==================
 
 
-Sorting files
-=============
-
-
-You can use the [sort] command to sort text files. For example,
-you can view the [facts.txt] file in sorted alphabetical order by
-running the command:
+Let\'s create a better version of our [hello.sh] script. We will
+let the user input his/her name and then we will greet the user; create
+a script named [greet.sh] with the following lines:
 
 ``` 
-elliot@ubuntu-linux:~$ sort facts.txt 
-Apples are red.
-Bananas are yellow.
-Cherries are red.
-Cherries are red.
-Cherries are red.
-Cherries are red.
-Earth is round.
-Grapes are green.
-Grass is green.
-Linux is awesome!
-Sky is high.
-Swimming is a sport.
+elliot@ubuntu-linux:~$ cat greet.sh 
+#!/bin/bash
+echo "Please enter your name:" 
+read name
+echo "Hello $name!"
 ```
 
-You can also use the [-r] option to sort in reverse order:
+Now make the script executable and then run it:
 
 ``` 
-elliot@ubuntu-linux:~$ sort -r facts.txt 
-Swimming is a sport.
-Sky is high.
-Linux is awesome!
-Grass is green.
-Grapes are green.
-Earth is round.
-Cherries are red.
-Cherries are red.
-Cherries are red.
-Cherries are red.
-Bananas are yellow.
-Apples are red.
+elliot@ubuntu-linux:~$ chmod a+x greet.sh 
+elliot@ubuntu-linux:~$ ./greet.sh
+Please enter your name:
 ```
 
-You can also use the [-n] option to sort by numerical values
-rather than literal values.
-
-
-Showing unique lines
-====================
-
-
-You can use the [uniq] command to omit repeated lines in a file.
-For example, notice that the line [Cherries are red.] is included
-four times in the file [facts.txt]:
-
-To view [facts.txt] without repeated lines, you can run:
+When you run the script, it will prompt you to enter your name; I
+entered [Elliot] as my name:
 
 ``` 
-elliot@ubuntu-linux:~$ uniq facts.txt 
-Apples are red.
-Grapes are green.
-Bananas are yellow.
-Cherries are red.
-Sky is high.
-Earth is round.
-Linux is awesome!
-Cherries are red.
-Grass is green.
-Swimming is a sport.
+elliot@ubuntu-linux:~$ ./greet.sh 
+Please enter your name:
+Elliot
+Hello Elliot!
 ```
 
-Notice that [Cherries are red.] is still shown twice in the
-output. That's because the [uniq] command only omits repeated
-lines but not duplicates! If you want to omit duplicates, you have to
-[sort] the file first and then use a pipe to apply the
-[uniq] command on the sorted output:
+The script greeted me with \"Hello Elliot!\". We used the [read]
+command to get the user input, and notice in the [echo] statement,
+we used a dollar sign, [\$], to print the value of the variable
+[name].
+
+Let\'s create another script that reads a filename from the user and
+then outputs the size of the file in bytes; we will name our script
+[size.sh]:
 
 ``` 
-elliot@ubuntu-linux:~$ sort facts.txt | uniq 
-Apples are red.
-Bananas are yellow.
-Cherries are red.
-Earth is round.
-Grapes are green.
-Grass is green.
-Linux is awesome!
-Sky is high.
-Swimming is a sport.
+elliot@ubuntu-linux:~$ cat size.sh
+#!/bin/bash
+echo "Please enter a file path:" 
+read file
+filesize=$(du -bs $file| cut -f1)
+echo "The file size is $filesize bytes"
 ```
 
-Boom! We have successfully omitted repeated and duplicate lines.
+And never forget to make the script executable:
+
+``` 
+elliot@ubuntu-linux:~$ chmod a+x size.sh
+```
+
+Now let\'s run the script:
+
+``` 
+elliot@ubuntu-linux:~$ size.sh 
+Please enter a file path
+/home/elliot/size.sh
+The file size is 128 bytes
+```
+
+I used [size.sh] as the file path, and the output was 128 bytes;
+is that true? Let\'s check:
+
+``` 
+elliot@ubuntu-linux:~$ du -bs size.sh
+128 size.sh
+```
+
+Indeed it is; notice in the script the following line:
+
+``` 
+filesize=$(du -bs $file| cut -f1)
+```
+
+It stores the result of the command [du -bs \$file \| cut -f1] in
+the variable [filesize]:
+
+``` 
+elliot@ubuntu-linux:~$ du -bs size.sh | cut -f1 
+128
+```
+
+Also notice that the command [du -bs \$file cut -f1] is surrounded
+by parentheses and a dollar sign (on the left); this is called command
+substitution. In general, the syntax of command substitution goes as
+follows:
+
+``` 
+var=$(command)
+```
+
+The result of the [command] will be stored in the variable
+[var].
 
 
-Searching for patterns
+Passing arguments to scripts
+============================
+
+
+Instead of reading input from users, you can also pass arguments to a
+bash script. For example, let\'s create a bash script named
+[size2.sh] that does the same thing as the script [size.sh],
+but instead of reading the file from the user, we will pass it to the
+script [size2.sh] as an argument:
+
+``` 
+elliot@ubuntu-linux:~$ cat size2.sh 
+#!/bin/bash
+filesize=$(du -bs $1| cut -f1)
+echo "The file size is $filesize bytes"
+```
+
+Now let\'s make the script executable:
+
+``` 
+elliot@ubuntu-linux:~$ chmod a+x size2.sh
+```
+
+Finally, you can run the script:
+
+``` 
+elliot@ubuntu-linux:~$ size2.sh /home/elliot/size.sh 
+The file size is 128 bytes
+```
+
+You will get the same output as [size.sh]. Notice that we provided
+the file path\
+[/home/elliot/size.sh] as an argument to the script
+[size2.sh].
+
+We only used one argument in the script [size2.sh], and it is
+referenced by [\$1]. You can pass multiple arguments as well;
+let\'s create another script [size3.sh] that takes two files (two
+arguments) and outputs the size of each file:
+
+``` 
+elliot@ubuntu-linux:~$ cat size3.sh #!/bin/bash
+filesize1=$(du -bs $1| cut -f1) 
+filesize2=$(du -bs $2| cut -f1) 
+echo "$1 is $filesize1 bytes" 
+echo "$2 is $filesize2 bytes"
+```
+
+Now make the script executable and run it:
+
+``` 
+elliot@ubuntu-linux:~$ size3.sh /home/elliot/size.sh /home/elliot/size3.sh
+/home/elliot/size.sh is 128 bytes
+/home/elliot/size3.sh is 136 bytes
+```
+
+Awesome! As you can see, the first argument is referenced by
+[\$1], and the second argument is referenced by [\$2]. So in
+general:
+
+``` 
+bash_script.sh argument1 argument2 argument3 ...
+                    $1         $2         $3
+```
+
+
+Using the if condition
 ======================
 
 
-The [grep] command is one of the most popular and useful commands
-in Linux. You can use [grep] to print the lines of text that match
-a specific pattern. For example, if you want to only display the lines
-that contain the word [green] in [facts.txt], you can run:
+Let\'s create a script [empty.sh] that will examine
+whether a file is empty or not:
 
 ``` 
-elliot@ubuntu-linux:~$ grep green facts.txt 
-Grapes are green.
-Grass is green.
+elliot@ubuntu-linux:~$ cat empty.sh 
+#!/bin/bash
+filesize=$(du -bs $1 | cut -f1) 
+if [ $filesize -eq 0 ]; then 
+echo "$1 is empty!"
+fi
 ```
 
-As you can see, it only printed the two lines that contain the word
-[green].
-
-The [grep] command can also be very useful when used with pipes.
-For example, to only list the [txt] files in your home directory,
-you can run the command:
+Now let\'s make the script executable and also create an empty file
+named [zero.txt]:
 
 ``` 
-elliot@ubuntu-linux:~$ ls | grep txt 
-all.txt
-error.txt 
-facts2.txt 
-facts.txt 
-Mars.txt 
-mydate.txt 
-output.txt 
-planets.txt 
-soft.txt
+elliot@ubuntu-linux:~$ chmod a+x empty.sh 
+elliot@ubuntu-linux:~$ touch zero.txt
 ```
 
-You can use the [-i] option to make your search case-insensitive.
-For example, if you want to print the lines that contain the word
-[Earth] in [facts.txt], then use the command:
+Now let\'s run the script on the file [zero.txt]:
 
 ``` 
-elliot@ubuntu-linux:~$ grep earth facts.txt 
+elliot@ubuntu-linux:~$ ./empty.sh zero.txt 
+zero.txt is empty!
+```
+
+As you can see, the script correctly detects that [zero.txt] is an
+empty file; that\'s because the test condition is true in this case as
+the file [zero.txt] is indeed zero bytes in size:
+
+``` 
+if [ $filesize -eq 0 ];
+```
+
+We used [-eq] to test for equality. Now if you run the script on a
+non-empty file, there will be no output:
+
+``` 
+elliot@ubuntu-linux:~$ ./empty.sh size.sh 
 elliot@ubuntu-linux:~$
 ```
 
-This will show no result because [grep] is case-sensitive by
-default. However, if you pass the [-i] option:
+We need to modify the script [empty.sh] so that it displays an
+output whenever it\'s passed a non-empty file; for that, we will use the
+[if-else] statement:
 
 ``` 
-elliot@ubuntu-linux:~$ grep -i earth facts.txt 
-Earth is round.
+if [ condition is true ]; then 
+    do this ...
+else
+    do this instead ...
+fi
 ```
 
-It will make the search case-insensitive, and hence it will display the
-line [Earth is round.]
-
-
-The stream editor
-=================
-
-
-You can use the stream editor command [sed] to filter and
-transform text. For example, to substitute the word [Sky] with the
-word [Cloud] in [facts.txt], you can run the command:
+Let\'s edit the [empty.sh] script by adding the following
+[else] statement:
 
 ``` 
-elliot@ubuntu-linux:~$ sed 's/Sky/Cloud/' facts.txt 
-Apples are red.
-Grapes are green.
-Bananas are yellow.
-Cherries are red.
-Cloud is high.
-Earth is round.
-Linux is awesome!
-Cherries are red.
-Cherries are red.
-Cherries are red.
-Grass is green.
-Swimming is a sport.
+elliot@ubuntu-linux:~$ cat empty.sh 
+#!/bin/bash
+filesize=$(du -bs $1 | cut -f1) 
+if [ $filesize -eq 0 ]; then 
+echo "$1 is empty!"
+else
+echo "$1 is not empty!" 
+fi
 ```
 
-As you can see in the output, the word [Sky] is replaced with
-[Cloud]. However, the file [facts.txt] is not edited. To
-overwrite (edit) the file, you can use the [-i] option:
+Now let\'s rerun the script:
 
 ``` 
-elliot@ubuntu-linux:~$ sed -i 's/Sky/Cloud/' facts.txt 
-elliot@ubuntu-linux:~$ cat facts.txt
-Apples are red.
-Grapes are green.
-Bananas are yellow.
-Cherries are red.
-Cloud is high.
-Earth is round.
-Linux is awesome!
-Cherries are red.
-Cherries are red.
-Cherries are red.
-Grass is green.
-Swimming is a sport.
+elliot@ubuntu-linux:~$ ./empty.sh size.sh 
+size.sh is not empty!
+elliot@ubuntu-linux:~$ ./empty.sh zero.txt 
+zero.txt is empty!
 ```
 
-As you can see, the change is reflected in the file.
+As you can see, it now works perfectly!
 
-
-Translating characters
-======================
-
-One popular use of the [tr] command is to change lower case
-letters to upper case (or vice versa). For example, if you want to
-display all the words in [facts.txt] in upper case, you can run:
+You can also use the [elif] (**else-if**) statement to create
+multiple test conditions:
 
 ``` 
-elliot@ubuntu-linux:~$ cat facts.txt | tr [:lower:] [:upper:] 
-APPLES ARE RED.
-GRAPES ARE GREEN.
-BANANAS ARE YELLOW.
-CHERRIES ARE RED.
-CLOUD IS HIGH.
-EARTH IS ROUND.
-LINUX IS AWESOME!
-CHERRIES ARE RED.
-CHERRIES ARE RED.
-CHERRIES ARE RED.
-GRASS IS GREEN.
-SWIMMING IS A SPORT.
+if [ condition is true ]; then 
+    do this ...
+elif [ condition is true]; then 
+    do this instead ...
+fi
 ```
 
-You can also display all the words in lower case:
+Let\'s create a script [filetype.sh] that detects a file type. The
+script will output whether a file is a regular file, a soft link, or a
+directory:
 
 ``` 
-elliot@ubuntu-linux:~$ cat facts.txt | tr [:upper:] [:lower:] 
-apples are red.
-grapes are green. 
-bananas are yellow. 
-cherries are red. 
-cloud is high. 
-earth is round. 
-linux is awesome! 
-cherries are red. 
-cherries are red. 
-cherries are red. 
-grass is green. 
-swimming is a sport.
+elliot@ubuntu-linux:~$ cat filetype.sh 
+#!/bin/bash
+file=$1
+if [ -f $1 ]; then
+echo "$1 is a regular file" 
+elif [ -L $1 ]; then
+echo "$1 is a soft link" 
+elif [ -d $1 ]; then 
+echo "$1 is a directory" 
+fi
 ```
 
-You can also use the [-d] option to delete characters. For
-example, to remove all spaces in [facts.txt], you can run:
+Now let\'s make the script executable and also create a soft link to
+[/tmp] named [tempfiles]:
 
 ``` 
-elliot@ubuntu-linux:~$ cat facts.txt | tr -d ' ' 
-Applesarered.
-Grapesaregreen.
-Bananasareyellow.
-Cherriesarered.
-Cloudishigh.
-Earthisround.
-Linuxisawesome!
-Cherriesarered.
-Cherriesarered.
-Cherriesarered.
-Grassisgreen.
-Swimmingisasport.
+elliot@ubuntu-linux:~$ chmod a+x filetype.sh 
+elliot@ubuntu-linux:~$ ln -s /tmp tempfiles
 ```
 
-
-**A COOL TIP**
-
-The [tr] command doesn't change (edit) the contents of the file.
-It just writes the changes to the standard output. However, you can use
-output redirection to store the output into another file.
-
-
-For example, running the command:
+Now run the script on any directory:
 
 ``` 
-elliot@ubuntu-linux:~$ cat facts.txt | tr [:lower:] [:upper:] > upper.txt
+elliot@ubuntu-linux:~$ ./filetype.sh /bin
+/bin is a directory
 ```
 
-will store the output of the command:
+It correctly detects that [/bin] is a directory. Now run the
+script on any regular file:
 
 ``` 
-cat facts.txt | tr [:lower:] [:upper:]
+elliot@ubuntu-linux:~$ ./filetype.sh zero.txt 
+zero.txt is a regular file
 ```
 
-into the file [upper.txt].
-
-
-Cutting text
-============
-
-
-If you want to view only a part (or a section) of a file, then the
-[cut] command can prove very helpful. For instance, you can see
-that each line in the [facts.txt] file consists of several words
-that are separated by a single space. If you only want to view the first
-word in each line (first column/field), then you can run the following
-command:
+It correctly detects that [zero.txt] is a regular file. Finally,
+run the script on any soft link:
 
 ``` 
-elliot@ubuntu-linux:~$ cut -d ' ' -f1 facts.txt 
-Apples
-Grapes 
-Bananas 
-Cherries 
-Cloud 
-Earth 
-Linux 
-Cherries 
-Cherries 
-Cherries 
-Grass 
-Swimming
+elliot@ubuntu-linux:~$ ./filetype.sh tempfiles 
+tempfiles is a soft link
 ```
 
-The [-d] option is the delimiter, and it has to be a single
-character. In this case, I chose the delimiter to be the space character
-[\' \']. I also used the [-f1] option to view only the first
-field (column).
+It correctly detects that [tempfiles] is a soft link.
 
-If you want to view the third word of each line (third field), then you
-can use [-f3] instead of [-f1] as follows:
+
+Looping in bash scripts
+=======================
+
+
+The ability to loop is a very powerful feature of bash scripting. For
+example, let\'s say you want to print out the line \"Hello world\" 20
+times on your terminal; a naive approach would be to create a script
+that has 20 [echo] statements. Luckily, looping offers a smarter
+solution.
+
+Using the for loop
+------------------
+
+The following [for] loop
+will print out \"Hello World\" twenty times:
 
 ``` 
-elliot@ubuntu-linux:~$ cut -d ' ' -f3 facts.txt 
-red.
-green. 
-yellow. 
-red. 
-high. 
-round. 
-awesome! 
-red. 
-red. 
-red. 
-green.     
-a
+for ((i = 0 ; i < 20 ; i++)); do 
+    echo "Hello World"
+done
 ```
 
-You can also select more than one field at a time. For example, to view
-the first and the third word of each line, you can use [-f1,3]:
+The loop initializes the integer variable [i] to [0], then
+it tests the condition ([i \< 20]); if true, it then executes the
+line echo \"Hello World\" and increments the variable [i] by one,
+and then the loop runs again and again until [i] is no longer less
+than [20].
+
+Now let\'s create a script [hello20.sh] that has the [for]
+loop we just discussed:
 
 ``` 
-elliot@ubuntu-linux:~$ cut -d ' ' -f1,3 facts.txt 
-Apples red.
-Grapes green.
-Bananas yellow.
-Cherries red.
-Cloud high.
-Earth round.
-Linux awesome!
-Cherries red.
-Cherries red.
-Cherries red.
-Grass green.
-Swimming a
-
+elliot@ubuntu-linux:~$ cat hello20.sh 
+#!/bin/bash
+for ((i = 0 ; i < 20 ; i++)); do 
+    echo "Hello World"
+done
 ```
 
-
-Text processing with awk
-========================
-
-You can use [awk] to achieve the same functionality as the
-[cut] command. For example, to view the first word of each line in
-the file [facts.txt], you can run:
+Now make the script executable and run it:
 
 ``` 
-elliot@ubuntu-linux:~$ awk '{print $1}' facts.txt 
-Apples
-Grapes 
-Bananas 
-Cherries 
-Cloud 
-Earth 
-Linux 
-Cherries 
-Cherries 
-Cherries 
-Grass 
-Swimming
+elliot@ubuntu-linux:~$ chmod a+x hello20.sh 
+elliot@ubuntu-linux:~$ hello20.sh
+Hello World 
+Hello World
+Hello World 
+Hello World 
+Hello World 
+Hello World 
+Hello World 
+Hello World 
+Hello World 
+Hello World 
+Hello World 
+Hello World 
+Hello World 
+Hello World 
+Hello World 
+Hello World 
+Hello World 
+Hello World 
+Hello World 
+Hello World
 ```
 
-Notice we didn't need to specify the space character [\' \'] as a
-delimiter as we did with the [cut] command and that's because
-[awk] is smart enough to figure it out on its own. You can also
-view more than one field at a time; for example, to view the first and
-the second word of each line, you can run:
+It outputs the line \"Hello World\" twenty times as we expected. Instead
+of the C-style syntax, you can also use the range syntax with the
+[for] loop:
 
 ``` 
-elliot@ubuntu-linux:~$ awk '{print $1,$2}' facts.txt 
-Apples are
-Grapes are 
-Bananas are 
-Cherries are 
-Cloud is 
-Earth is 
-Linux is 
-Cherries are 
-Cherries are 
-Cherries are 
-Grass is 
-Swimming is
+for i in {1..20}; do 
+    echo "Hello World"
+done
 ```
 
-One advantage [awk] has over [cut] is that [awk] is
-smart enough to separate the file into different fields even if there is
-more than one character separating each field. The [cut] command
-only works if the file has a single delimiter like a single space, a
-colon, a comma, and so on.
-
-To demonstrate, create a file named [animals.txt] and insert these
-four lines:
+This will also output \"Hello World\" 20 times. This range syntax is
+particularly useful when working with a list of files. To demonstrate,
+create the following five files:
 
 ``` 
-fox        is smart
-whale is   big
-cheetah  is           fast 
-penguin     is cute
+elliot@ubuntu-linux:~$ touch one.doc two.doc three.doc four.doc five.doc
 ```
 
-Do not edit the format; keep the spaces messed up:
+Now let\'s say we want to rename the extension for all five files from
+[.doc] to\
+[.document]. We can create a script [rename.sh] that has the
+following [for] loop:
 
 ``` 
-elliot@ubuntu-linux:~$ cat animals.txt 
-fox        is smart
-whale is   big
-cheetah  is           fast 
-penguin     is cute
+#!/bin/bash
+for i in /home/elliot/*.doc; do
+    mv $i $(echo $i | cut -d. -f1).document
+done
 ```
 
-Now, if you try to use the [cut] command to only show the third
-word in each line, it will fail because there is more than one space
-separating each word.
-
-However, [awk] is smart enough to figure it out:
+Make the script executable and run it:
 
 ``` 
-elliot@ubuntu-linux:~$ awk '{print $3}' animals.txt 
-smart
-big 
-fast 
-cute
+#!/bin/bash
+elliot@ubuntu-linux:~$ chmod a+x rename.sh 
+elliot@ubuntu-linux:~$ ./rename.sh 
+elliot@ubuntu-linux:~$ ls *.document
+five.document four.document one.document three.document two.document
 ```
 
-As you can see, the third word in each line is displayed. You can also
-use [awk] to search for patterns, just like the [grep]
-command. For example, to print the lines that contain the word
-[red] in [facts.txt], you can run the command:
+As you can see, it renamed all the files with the [.doc] extension
+to [.document]. Now imagine if you wanted to do this for a million
+files. If you don\'t know bash scripting, you would probably spend ten
+years doing it. We should all thank the Linux Gods for bash scripting.
+
+Using the while loop
+--------------------
+
+The [while] loop is another popular and intuitive loop. The
+general syntax for a [while] loop is as follows:
 
 ``` 
-elliot@ubuntu-linux:~$ awk '/red/{print}' facts.txt 
-Apples are red.
-Cherries are red. 
-Cherries are red. 
-Cherries are red. 
-Cherries are red.
-
+while [ condition is true ]; do
+  // do something 
+done
 ```
 
+For example, we can create a simple script [numbers.sh] that
+prints the numbers from one to ten:
 
-Wildcard characters
+``` 
+elliot@ubuntu-linux:~$ cat numbers.sh 
+#!/bin/bash
+number=1
+while [ $number -le 10 ]; do 
+echo $number 
+number=$(($number+1))
+done
+```
+
+Make the script executable and run it:
+
+``` 
+elliot@ubuntu-linux:~$ chmod a+x numbers.sh 
+elliot@ubuntu-linux:~$ ./numbers.sh
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+```
+
+The script is simple to understand; we first initialized the variable
+number to [1]:
+
+``` 
+number=1
+```
+
+Then we created a test condition that will keep the [while] loop
+running as long as the variable [number] is less than or equal to
+10:
+
+``` 
+while [ $number -le 10 ]; do
+```
+
+Inside the body of the [while] loop, we first print out the value
+of the variable [number], and then we increment it by one. Notice
+that to evaluate an arithmetic expression, it needs to be within double
+parentheses as [\$((arithmetic-expression))]:
+
+``` 
+echo $number 
+number=$(($number+1))
+```
+
+Now it\'s time for some fun! We will create a number guessing game. But
+before we do that, let me introduce you to a pretty cool command. You
+can use the shuffle command [shuf] to generate random
+permutations. For example, to generate a random permutation of the
+numbers between 1 and 10, you can run the following command:
+
+``` 
+elliot@ubuntu-linux:~$ shuf -i 1-10 
+1
+6
+5
+2
+10
+8
+3
+9
+7
+4
+```
+
+Keep in mind that my output will most likely be different from your
+output because it is random! There is a one in a million chance that you
+will have the same output as me.
+
+Now we can use the [-n] option to select one number out of the
+permutation. This number will be random as well. So to generate a random
+number between 1 and 10, you can run the following command:
+
+``` 
+elliot@ubuntu-linux:~$ shuf -i 1-10 -n 1
+6
+```
+
+The output will be a random number between 1 and 10. The [shuf]
+command will play a key role in our game. We will generate a random
+number between 1 and 10, and then we will see how many tries it will
+take the user (player) to guess the random number correctly.
+
+Here is our lovely handcrafted script [game.sh]:
+
+``` 
+elliot@ubuntu-linux:~$ cat game.sh 
+#!/bin/bash
+random=$(shuf -i 1-10 -n 1) #generate a random number between 1 and 10. 
+echo "Welcome to the Number Guessing Game"
+echo "The lucky number is between 1 and 10." 
+echo "Can you guess it?"
+tries=1
+while [ true ]; do
+echo -n "Enter a Number between 1-10: " 
+read number
+if [ $number -gt $random ]; then 
+echo "Too high!"
+elif [ $number -lt $random ]; then 
+echo "Too low!"
+else
+echo "Correct! You got it in $tries tries" 
+break #exit the loop
+fi 
+tries=$(($tries+1)) 
+done
+```
+
+Now make the script executable and run it to start the game:
+
+``` 
+elliot@ubuntu-linux:~$ chmod a+x game.sh 
+elliot@ubuntu-linux:~$ game.sh
+Welcome to the Number Guessing Game 
+The lucky number is between 1 and 10. 
+Can you guess it?
+Enter a Number between 1-10: 4 
+Too low!
+Enter a Number between 1-10: 7 
+Too low!
+Enter a Number between 1-10: 9 
+Too high!
+Enter a Number between 1-10: 8 
+Correct! You got it in 4 tries
+```
+
+It took me four tries in my first attempt at the game; I bet you can
+easily beat me!\
+Let\'s go over our game script line by line. We first generate a random
+number between 1 and 10 and assign it to the variable [random]:
+
+``` 
+random=$(shuf -i 1-10 -n 1) #generate a random number between 1 and 10.
+```
+
+Notice that you can add comments in your bash script as I did here by
+using the hash character, followed by your comment.
+
+We then print three lines that explain the game to the player:
+
+``` 
+echo "Welcome to the Number Guessing Game" 
+echo "The lucky number is between 1 and 10." 
+echo "Can you guess it?"
+```
+
+Next, we initialize the variable [tries] to [1] so that we
+can keep track of how many guesses the player took:
+
+``` 
+tries=1
+```
+
+We then enter the game loop:
+
+``` 
+while [ true ]; do
+```
+
+Notice the test condition [while \[ true \]] will always be
+[true], and so the loop will keep running forever (infinite loop).
+
+The first thing we do in the game loop is that we ask the player to
+enter a number between 1 and 10:
+
+``` 
+echo -n "Enter a Number between 1-10: " 
+read number
+```
+
+We then test to see if the number the player has entered is greater
+than, less than, or equal to the [random] number:
+
+``` 
+if [ $number -gt $random ]; then 
+echo "Too high!"
+elif [ $number -lt $random ]; then 
+echo "Too low!"
+else
+echo "Correct! You got it in $tries tries" 
+break #exit the loop
+fi
+```
+
+If [number] is bigger than [random], we tell the player that
+the guess is too high to make it easier for the player to have a better
+guess next time. Likewise, if [number] is smaller than
+[random], we tell the player the guess is too low. Otherwise, if
+it is a correct guess, then we print the total number of tries the
+player exhausted to make the correct guess, and we break from the loop.
+
+Notice that you need the [break] statement to exit from the
+infinite loop. Without the [break] statement, the loop will run
+forever.
+
+Finally, we increment the number of [tries] by 1 for each
+incorrect guess (high or low):
+
+``` 
+tries=$(($tries+1))
+```
+
+I have to warn you that this game is addictive! Especially when you play
+it with a friend to see who will get the correct guess in the least
+number of tries.
+
+Using the until loop
+--------------------
+
+Both the [for] and [while] loops run as long as the test
+condition is [true]. On the flip side, the [until] loop
+keeps running as long as the test condition is [false]. That\'s to
+say, it stops running as soon as the test condition is [true].
+
+The general syntax of an [until] loop is as follows:
+
+``` 
+until [condition is true]; do 
+  [commands]
+done
+```
+
+For example, we can create a simple script [3x10.sh] that prints
+out the first ten multiples of [3]:
+
+``` 
+elliot@ubuntu-linux:~$ cat 3x10.sh 
+#!/bin/bash
+counter=1
+until [ $counter -gt 10 ]; do 
+echo $(($counter * 3)) 
+counter=$(($counter+1))
+done
+```
+
+Now make the script executable and then run it:
+
+``` 
+elliot@ubuntu-linux:~$ chmod a+x 3x10.sh 
+elliot@ubuntu-linux:~$ 3x10.sh
+3
+6
+9
+12
+15
+18
+21
+24
+27
+30
+```
+
+The script is easy to understand, but you might scratch your head a
+little bit trying to understand the test condition of the [until]
+loop:
+
+``` 
+until [ $counter -gt 10 ]; do
+```
+
+The test condition basically says: \"until [counter] is greater
+than 10, keep running!\"
+
+Notice that we can achieve the same result with a [while] loop
+that has the opposite test condition. You simply negate the test
+condition of the [until] loop and you will get the [while]
+loop equivalent:
+
+``` 
+while [ $counter -le 10 ]; do
+```
+
+In mathematics, the opposite (negation) of greater than ([\>]) is
+less than or equal to ([≤]). A lot of people forget the [equal
+to] part. Don\'t be one of those people!
+
+
+Bash script functions
+=====================
+
+
+When your scripts get bigger and bigger, things can get very messy. To
+overcome this problem, you can use bash functions. The idea behind
+functions is that you can reuse parts of your scripts, which in turn
+produces better organized and readable scripts.
+
+The general syntax of a bash function is as follows:
+
+``` 
+function_name () {
+<commands>
+}
+```
+
+Let\'s create a function named [hello] that prints out the line
+\"Hello World\". We will put the [hello] function in a new script
+named [fun1.sh]:
+
+``` 
+elliot@ubuntu-linux:~$ cat fun1.sh 
+#!/bin/bash
+
+hello () {
+echo "Hello World"
+}
+
+hello     # Call the function hello() 
+hello     # Call the function hello() 
+hello     # Call the function hello()
+```
+
+Now make the script executable and run it:
+
+``` 
+elliot@ubuntu-linux:~$ chmod a+x fun1.sh 
+elliot@ubuntu-linux:~$ ./fun1.sh
+Hello World 
+Hello World 
+Hello World
+```
+
+The script outputs the line \"Hello World\" three times to the terminal.
+Notice that we called (used) the function [hello] three times.
+
+Passing function arguments
+--------------------------
+
+Functions can also take arguments the same way a script can take
+arguments. To demonstrate, we will create a script [math.sh] that
+has two functions [add] and [sub]:
+
+``` 
+elliot@ubuntu-linux:~$ cat math.sh 
+#!/bin/bash
+
+add () {
+echo "$1 + $2 =" $(($1+$2))
+}
+
+sub () {
+echo "$1 - $2 =" $(($1-$2))
+}
+
+add 7 2
+sub 7 2
+```
+
+Make the script executable and then run it:
+
+``` 
+elliot@ubuntu-linux:~$ chmod a+x math.sh 
+elliot@ubuntu-linux:~$ ./math.sh
+7 + 2 = 9
+7 - 2 = 5
+```
+
+The script has two functions [add] and [sub]. The
+[add] function calculates and outputs the total of any given two
+numbers. On the other hand, the [sub] function calculates and
+outputs the difference of any given two numbers.
+
+
+No browsing for you
 ===================
 
 
-The wildcard characters are special characters in Linux, and they are
-used to specify a group (class) of characters. Let's look at some examples. You can
-use the [\*] wildcard to list all the [txt] files in your
-home directory:
+We will conclude this lab with a pretty cool bash script
+[noweb.sh] that makes sure no user is having fun browsing the web
+on the Firefox browser:
 
 ``` 
-elliot@ubuntu-linux:~$ ls -l *.txt
--rw-rw-r-- 1 elliot elliot  96 May 11 07:01 all.txt
--rw-rw-r-- 1 elliot elliot  91 May 12 06:10 animals.txt
--rw-rw-r-- 1 elliot elliot  92 May 11 06:48 error.txt
--rw-rw-r-- 1 elliot elliot 231 May 11 08:28 facts2.txt
--rw-rw-r-- 1 elliot elliot 212 May 11 18:37 facts.txt
--rw-rw-r-- 1 elliot elliot  18 May 11 06:12 Mars.txt
--rw-rw-r-- 1 elliot elliot  29 May 11 06:34 mydate.txt
--rw-rw-r-- 1 elliot elliot  57 May 11 07:00 output.txt
--rw-rw-r-- 1 elliot elliot  57 May 11 06:20 planets.txt
-lrwxrwxrwx 1 elliot elliot  9  May  8 22:02 soft.txt -> facts.txt
--rw-rw-r-- 1 elliot elliot 212 May 12 05:09 upper.txt
+elliot@ubuntu-linux:~$ cat noweb.sh 
+#!/bin/bash
+
+shutdown_firefox() { 
+killall firefox 2> /dev/null
+}
+
+while [ true ]; do 
+shutdown_firefox
+sleep 10 #wait for 10 seconds 
+done
 ```
 
-If you want to list only the filenames that begin with the letter
-[f], you can use [f\*]:
+Now open Firefox as a background process:
 
 ``` 
-elliot@ubuntu-linux:~$ ls -l f*
--rw-rw-r-- 1 elliot elliot 231 May 11 08:28 facts2.txt
--rw-rw-r-- 1 elliot elliot 212 May 11 18:37 facts.txt
+elliot@ubuntu-linux:~$ firefox & 
+[1] 30436
 ```
 
-If you want to list the filenames that contain three letters followed by
-a [.txt] extension, then you can use the [?] wildcard:
+Finally, make the script executable and run the script in the
+background:
 
 ``` 
-elliot@ubuntu-linux:~$ ls -l ???.txt
--rw-rw-r-- 1 elliot elliot 96 May 11 07:01 all.txt
+elliot@ubuntu-linux:~$ chmod a+x noweb.sh 
+elliot@ubuntu-linux:~$ ./noweb.sh &
+[1] 30759
 ```
 
-You can also use more than one wildcard at the same time. For example,
-if you want to list only the filenames that begin with the letter
-[a] or [f], you can use the [\[af\]] wildcard followed
-by the [\*] wildcard:
-
-``` 
-elliot@ubuntu-linux:~$ ls -l [af]*
--rw-rw-r-- 1 elliot elliot 96 May 11 07:01 all.txt
--rw-rw-r-- 1 elliot elliot 91 May 12 06:10 animals.txt
--rw-rw-r-- 1 elliot elliot 231 May 11 08:28 facts2.txt
--rw-rw-r-- 1 elliot elliot 212 May 11 18:37 facts.txt
-```
-
-You can also use set negations, for example, to list all the
-[.txt] filenames that begin with any letter other than [f],
-you can run use [\[!f\]\*]:
-
-``` 
-elliot@ubuntu-linux:~$ ls -l [!f]*.txt
--rw-rw-r-- 1 elliot elliot 96 May 11 07:01 all.txt
--rw-rw-r-- 1 elliot elliot 91 May 12 06:10 animals.txt
--rw-rw-r-- 1 elliot elliot 92 May 11 06:48 error.txt
--rw-rw-r-- 1 elliot elliot 18 May 11 06:12 Mars.txt
--rw-rw-r-- 1 elliot elliot 29 May 11 06:34 mydate.txt
--rw-rw-r-- 1 elliot elliot 57 May 11 07:00 output.txt
--rw-rw-r-- 1 elliot elliot 57 May 11 06:20 planets.txt
-lrwxrwxrwx 1 elliot elliot 9 May 8 22:02 soft.txt -> facts.txt
--rw-rw-r-- 1 elliot elliot 212 May 12 05:09 upper.txt
-```
-
-Now, before we do some examples of character classes, let's create the
-following four files:
-
-``` 
-elliot@ubuntu-linux:~$ touch One TWO 7wonders GTA1
-```
-
-Now, if you want to list the filenames that end with an upper case
-letter, you can use the character class [\[:upper:\]] as follows:
-
-``` 
-elliot@ubuntu-linux:~$ ls -l *[[:upper:]]
--rw-rw-r-- 1 elliot elliot 0 May 12 18:14 TWO
-```
-
-Notice that the character class itself is also surrounded by brackets.
-
-If you want to list the filenames that begin with a digit (number), you
-can use the character class [\[:digit:\]] as follows:
-
-``` 
-elliot@ubuntu-linux:~$ ls -l [[:digit:]]*
--rw-rw-r-- 1 elliot elliot 0 May 12 18:14 7wonders
-```
-
-And the only match was the file [7wonders].
-
-
-Regular expressions
-===================
-
-
-Up until now, we have been using wildcards with filenames. **Regular
-expressions** (**Regex** for short) is another Linux feature that will
-allow you to search for a specific pattern in text files. Regex is also
-often used with the [grep] command.
-
-Below table lists the most common regular expressions and their uses:
-
-![](./images/12.png)
-
-Well, that's a long list of regular expressions. Let's do some practice
-with them. Create a file named [practice.txt] that contains the
-following text:
-
-``` 
-111222333
-my cell number is 123-456-789. 
-you are a smart man
-man is a linux command. 
-man ... oh man.
-dog is a cute pet. 
-g
-dg 
-ddg 
-dddg
-Two stars ** 
-tan
-tantan 
-tantantan
-```
-
-To use regular expressions with the [grep] command, you can either
-use the [-E] option or the [egrep] command. The
-[egrep] command is simply an alias to [grep -E].
-
-Now, notice that the [*\**] regex is different from the
-[*\**] wildcard. To realize the difference, run the command:
-
-``` 
-elliot@ubuntu-linux:~$ egrep d*g practice.txt
-```
-
-This will give the following output:
-
-
-![](./images/d8fc24a1-9ede-44ff-8c5f-35b195cd0d17.png)
-
-
-
-
-
-Notice that [d\*g] didn't match the word [dog]; instead, it
-matched with:
-
--   [g] (zero occurrences of d)
--   [dg] (one occurrence of d)
--   [ddg] (two occurrences of d)
--   [dddg] (three occurrences of d)
-
-That's because the [*\** regex] matches zero or more of the
-preceding characters or expressions, unlike the [*\** wildcard],
-which matches any character.
-
-Now, to match one or more occurrences of [d] followed by
-[g], you can use the regex [d+g]:
-
-``` 
-elliot@ubuntu-linux:~$ egrep d+g practice.txt 
-dg
-ddg 
-dddg
-```
-
-To match the special character [\*], you can use the backslash
-between single or double quotes as follows:
-
-``` 
-elliot@ubuntu-linux:~$ egrep "\*" practice.txt 
-Two stars **
-```
-
-To match any pattern that contains the letter [m] followed by any
-single character, then the letter [n], you can run:
-
-``` 
-elliot@ubuntu-linux:~$ egrep m.n practice.txt 
-you are a smart man
-man is a linux command. 
-man ... oh man.
-```
-
-To match the lines that begin with the word [man], you can run:
-
-``` 
-elliot@ubuntu-linux:~$ egrep ^man practice.txt 
-man is a linux command.
-man ... oh man.
-```
-
-To match the lines that end with the word [man], you can run:
-
-``` 
-elliot@ubuntu-linux:~$ egrep man$ practice.txt 
-you are a smart man
-```
-
-You can use character classes as well. For example, to search for all
-the lines that contain at least one digit, you can run:
-
-``` 
-elliot@ubuntu-linux:~$ egrep "[[:digit:]]{1,}" practice.txt 
-111222333
-my cell number is 123-456-789.
-```
+The moment you run your script, Firefox will shut down. Moreover, if you
+run the script as the [root] user, none of the system users will
+be able to enjoy Firefox!
 
 
 Knowledge check
 ===============
 
 
-For the following exercises, open up your Terminal and try to solve the
+For the following exercises, open up your terminal and try to solve the
 following tasks:
 
-1.  Display the size (in bytes) of the file [/etc/hostname].
-2.  Display only the group names in the file [/etc/group].
-3.  Display the total number of lines in the file [/etc/services].
-4.  Display only the lines that contain the word \"bash\" in the file
-    [/etc/passwd].
-5.  Display the output of the [uptime] command in all uppercase
-    letters.
+1.  Create a bash script that will display the calendar of the current
+    month.
+2.  Modify your script so it displays the calendar for any year (passed
+    as an argument).
+3.  Modify your script so it displays the calendar for all the years
+    from [2000] to [2020].

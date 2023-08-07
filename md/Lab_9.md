@@ -1,440 +1,481 @@
 
-Lab: Introduction to Shells: sh, bash, and ksh: Piping and I/O Redirection
-==========================================================================
+Lab: Advanced Shell Features: Controlling Process
+----------------------------------------------------
 
 
-One of the main principles in Linux is that *Each program does one thing
-well* and thus, every Linux command is designed to accomplish a single
-task efficiently. In this lab, you will learn how to use Linux pipes
-to unleash the real power of Linux commands by combining their
-functionality to carry out more complex tasks. You will also learn about
-I/O (input/output) redirection, which will enable you to read user input
-and save command output to a file.
+Any program that is running on your system is a process. In this
+lab, you will learn all about Linux processes. You will learn how to
+view process information. You will also learn how to send different
+signals to a process. Furthermore, you will understand the differences
+between foreground and background processes.
 
 
-Linux pipes
-===========
-
-
-In Linux, you can use a pipe to send the output of one command to be the
-input (argument) of another command:
-
-
-![](./images/51ed85f7-0bf5-4bc6-9d5e-35f9d0eb0785.png)
-
-
-Before we do an example, let\'s first rename the [hard.txt] file
-to [facts.txt], as we removed the [facts.txt] file back in `Lab 6`,
-*Hard vs. Soft Links*:
+To list all the processes that are owned by a specific user, you can run
+the command [ps -u] followed by the username:
 
 ``` 
-elliot@ubuntu-linux:~$ mv hard.txt facts.txt
+ps -u username
 ```
 
-Now let\'s use the [head] command to view the first five lines of
-[facts.txt]:
+For example, to list all the processes that are owned by [elliot],
+you can run:
 
 ``` 
-elliot@ubuntu-linux:~$ head -n 5 facts.txt 
-Apples are red.
-Grapes are green.
-Bananas are yellow.
-Cherries are red.
-Sky is high.
+root@ubuntu-linux:~# ps -u elliot
+
+PID TTY          TIME CMD
+645 pts/0    00:00:00 bash
+675 pts/0    00:00:00 bash
+2387 pts/0    00:00:00 bash
+4955 pts/0    00:00:00 bash
+. 
+. 
+. 
+.
 ```
 
-Now I want to display only the fifth line [Sky is high.] of the
-file [facts.txt]; how can I do that?
 
-That\'s where the power of Linux pipes comes into play. If you pipe the
-output of the previous command to the [tail -n 1] command, you
-will get the fifth line:
+You can use the [ps -e] command to list all the processes that are
+running on your system:
 
 ``` 
-elliot@ubuntu-linux:~$ head -n 5 facts.txt | tail -n 1 
-Sky is high.
+root@ubuntu-linux:~# ps -e 
+PID TTY     TIME  CMD
+1  ?     00:00:01 systemd
+2  ?     00:00:00 kthreadd
+4  ?     00:00:00 kworker/0:0H
+6  ?     00:00:00 mm_percpu_wq
+7  ?     00:00:00 ksoftirqd/0
+8  ?     00:00:00 rcu_sched
+9  ?     00:00:00 rcu_bh
+10 ?     00:00:00 migration/0
+11 ?     00:00:00 watchdog/0
+12 ?     00:00:00 cpuhp/0
+13 ?     00:00:00 kdevtmpfs
+.
+.
+.
+.
 ```
 
-So by using a pipe, I was able to send the output of the command [head
--n 5 facts.txt] to the input (argument) of the command [tail -n
-1].
-
-Let\'s do another example. If you want to display the seventh line of
-the file [facts.txt], then you will show the first seven lines
-using the [head] command, then use a pipe to [tail] the last
-line:
+You can also use the [-f] option to get more information:
 
 ``` 
-elliot@ubuntu-linux:~$ head -n 7 facts.txt | tail -n 1 
-Linux is awesome
+root@ubuntu-linux:~# ps -ef
+UID    PID  PPID C STIME TTY    TIME    CMD
+root      1    0 0 11:23    ? 00:00:01 /sbin/init splash
+root      2    0 0 11:23    ? 00:00:00 [kthreadd]
+root      4    2 0 11:23    ? 00:00:00 [kworker/0:0H]
+root      6    2 0 11:23    ? 00:00:00 [mm_percpu_wq]
+root      7    2 0 11:23    ? 00:00:00 [ksoftirqd/0]
+root      8    2 0 11:23    ? 00:00:01 [rcu_sched]
+root      9    2 0 11:23    ? 00:00:00 [rcu_bh]
+root     10    2 0 11:23    ? 00:00:00 [migration/0]
+elliot 1835 1393 1 11:25 tty2 00:00:58 /usr/bin/gnome-shell
+elliot 1853 1835 0 11:25 tty2 00:00:00 ibus-daemon --xim --panel disable
+elliot 1857 1365 0 11:25    ? 00:00:00 /usr/lib/gnome-shell/gnome-shell
+elliot 1865 1853 0 11:25 tty2 00:00:00 /usr/lib/ibus/ibus-dconf
+elliot 1868    1 0 11:25 tty2 00:00:00 /usr/lib/ibus/ibus-x11 --kill-daemon
+elliot 1871 1365 0 11:25    ? 00:00:00 /usr/lib/ibus/ibus-portal
+. 
+. 
+. 
 ```
 
-You can also use more than one pipe at a time as demonstrated in the
-following diagram:
+The first column of the output lists the usernames of the process
+owners. The third column of the output lists the **parent process
+identifiers** (**PPIDs**). Well, what the heck is a parent process?
 
 
-![](./images/1c680413-5616-47e0-a572-bc2fdd212cd8.png)
+Parent process versus child process
+===================================
 
 
+A parent process is a process that has started one or more child
+processes. A perfect example will be your terminal and your bash shell;
+when you open your terminal, your bash shell is started as well.
 
-For example, you already know that the [lscpu] command displays
-your processor information. The fourth line of the [lscpu] command
-output shows how many CPUs your machine has. You can display the fourth
-line of the [lscpu] command by using two pipes:
+To get the PID of a process, you can use the [pgrep] command
+followed by the process name:
 
 ``` 
-elliot@ubuntu-linux:~$ lscpu | head -n 5 | tail -n 1 
-CPU(s):       4
+pgrep process_name
 ```
 
-So let\'s break down what happened here. The first pipe we used was to
-show the first four lines of the [lscpu] command:
+For example, to get the PID of your terminal process, you can run:
 
 ``` 
-elliot@ubuntu-linux:~$ lscpu | head -n 5 
-
-Architecture:                    x86_64
-CPU op-mode(s):                  32-bit, 64-bit
-Byte Order:                      Little Endian
-Address sizes:                   40 bits physical, 48 bits virtual
-CPU(s):                          4
+elliot@ubuntu-linux:~$ pgrep terminal 
+10009
 ```
 
-We then used the second pipe to [tail] the last line, which gets
-us the fourth line in this case:
+The PID of my terminal is [10009]. Now, let\'s get the PID of the
+bash process:
 
 ``` 
-elliot@ubuntu-linux:~$ lscpu | head -n 5 | tail -n 1 
-CPU(s):        4
+elliot@ubuntu-linux:~$ pgrep bash 
+10093
 ```
 
-You can similarly display the second line of [lscpu], which shows
-your CPU operation modes, but I will leave that for you to do as an
-exercise.
+The PID of my bash shell is [10093]. Now, you can get the
+information of your bash process by using the [-p] option followed
+by the bash PID:
+
+``` 
+elliot@ubuntu-linux:~$ ps -fp ADD_YOUR_BASH_PROCESS_ID
+UID     PID   PPID  C  STIME  TTY   TIME   CMD
+elliot 10093 10009  0  13:37 pts/1 00:00:00 bash
+```
+
+You can see from the output that the PPID of my bash process is equal to
+the PID of my terminal process. This proves that the terminal process
+has started the bash process. In this case, the bash process is referred
+to as the child process of the terminal process:
 
 
-Input and output redirection
+![](./images/68a16a2f-05d3-48b0-b7e8-1b7c9afd602d.png)
+
+
+
+The [top] command is a very useful command that you can use to
+view processes\' information in real time. The output for the preceding command is shown in the following screenshot:
+
+
+![](./images/4b5b24da-6935-416b-866e-6288240492b2.png)
+
+
+
+Foreground versus background processes
+======================================
+
+
+There are two types of processes in Linux:
+
+-   Foreground processes
+-   Background processes
+
+The [yes] command outputs any string that follows it repeatedly
+until killed:
+
+``` 
+elliot@ubuntu-linux:~$ whatis yes
+yes (1)               - output a string repeatedly until killed
+```
+
+For example, to output the word [hello] repeatedly on your
+terminal, you can run the command:
+
+``` 
+elliot@ubuntu-linux:~$ yes hello 
+hello
+hello 
+hello 
+hello 
+hello 
+hello 
+hello 
+hello 
+hello 
+hello
+.
+.
+.
+```
+
+Notice that it will keep running, and you can\'t do anything else on
+your terminal; this is a prime example of a foreground process. To claim
+back your terminal, you need to kill the process. You can kill the
+process by hitting the *Ctrl* + *C* key combination as follows:
+
+``` 
+hello 
+hello 
+hello 
+hello 
+hello
+^C
+elliot@ubuntu-linux:~$
+
+
+```
+
+As soon as you hit *Ctrl* + *C*, the process will be killed, and you can
+continue using your terminal. Let\'s do another example; you can use the
+[firefox] command to start up Firefox from your terminal:
+
+``` 
+elliot@ubuntu-linux:~$ firefox
+```
+
+The Firefox browser will start, but you will not be able to do anything
+on your terminal until you close Firefox; this is another example of a
+foreground process. Now, hit *Ctrl* + *C* to kill the Firefox process so
+you can claim back your terminal.
+
+You can start up Firefox as a background process by adding the ampersand
+character as follows:
+
+``` 
+elliot@ubuntu-linux:~$ firefox &
+[1] 3468
+elliot@ubuntu-linux:~$
+```
+
+Firefox is now running as a background process, and you can continue
+using your terminal without having to close Firefox.
+
+
+Sending signals to processes
 ============================
 
 
-In this section, you will get to learn one of the coolest Linux
-features, which is I/O (input/output) redirection. Most Linux commands
-work with three different streams of data:
-
--   Standard input (also referred to as [stdin])
--   Standard output (also referred to as [stdout])
--   Standard error (also referred to as [stderr])
-
-
-Redirecting standard output
-===========================
-
-
-You know that running the [date] command will display the current
-date on your terminal:
+You can interact and communicate with processes via signals. There are
+various signals, and each signal serves a different purpose. To list all
+available signals, you can run the [kill -L] command:
 
 ``` 
-elliot@ubuntu-linux:~$ date 
-Wed Mar 15 11:50:13 UTC 2023
+elliot@ubuntu-linux:~$ kill -L
+1) SIGHUP 2) SIGINT 3) SIGQUIT 4) SIGILL 5) SIGTRAP
+6) SIGABRT 7) SIGBUS 8) SIGFPE 9) SIGKILL 10) SIGUSR1
+11) SIGSEGV 12) SIGUSR2 13) SIGPIPE 14) SIGALRM 15) SIGTERM
+16) SIGSTKFLT 17) SIGCHLD 18) SIGCONT 19) SIGSTOP 20) SIGTSTP
+21) SIGTTIN 22) SIGTTOU 23) SIGURG 24) SIGXCPU 25) SIGXFSZ
+26) SIGVTALRM 27) SIGPROF 28) SIGWINCH 29) SIGIO 30) SIGPWR
+31) SIGSYS 34) SIGRTMIN 35) SIGRTMIN+1 36) SIGRTMIN+2 37) SIGRTMIN+3
+38) SIGRTMIN+4 39) SIGRTMIN+5 40) SIGRTMIN+6 41) SIGRTMIN+7 42) SIGRTMIN+8
+43) SIGRTMIN+9 44) SIGRTMIN+10 45) SIGRTMIN+11 46) SIGRTMIN+12 47) SIGRTMIN+13
+48) SIGRTMIN+14 49) SIGRTMIN+15 50) SIGRTMAX-14 51) SIGRTMAX-13 52) SIGRTMAX-12
+53) SIGRTMAX-11 54) SIGRTMAX-10 55) SIGRTMAX-9 56) SIGRTMAX-8 57) SIGRTMAX-7
+58) SIGRTMAX-6 59) SIGRTMAX-5 60) SIGRTMAX-4 61) SIGRTMAX-3 62) SIGRTMAX-2
+63) SIGRTMAX-1 64) SIGRTMAX
 ```
 
-Now by using the greater than sign [\>], you can redirect the
-output of the [date] command to a file instead of your terminal!
-Have a look:
+Notice that every signal has a numeric value. For example, [19] is
+the numeric value for the [SIGSTOP] signal.
+
+To see how signals work, let\'s first start Firefox as a background
+process:
 
 ``` 
-elliot@ubuntu-linux:~$ date > mydate.txt
+elliot@ubuntu-linux:~$ firefox &
+[1] 4218
 ```
 
-As you can see, there is no output displayed on your screen! That\'s
-because the output got redirected to the file [mydate.txt]:
+Notice that the PID of Firefox is [4218] on my system. I can kill
+(terminate) Firefox by sending a [SIGKILL] signal as follows:
 
 ``` 
-elliot@ubuntu-linux:~$ cat mydate.txt 
-Sat May 11 06:04:49 CST 2019
+elliot@ubuntu-linux:~$ kill -SIGKILL ADD_FIREFOX_PROCESS_ID
+[1]+ Killed             firefox
 ```
 
-Cool! Let\'s try some more examples. You can print a line on your
-terminal with the [echo] command:
+This will immediately shut down Firefox. You can also use the numeric
+value of the [SIGKILL] signal instead:
 
 ``` 
-elliot@ubuntu-linux:~$ echo "Mars is a planet." 
-Mars is a planet.
+elliot@ubuntu-linux:~$ kill -9 ADD_FIREFOX_PROCESS_ID
 ```
 
-If you want to redirect the output to a file named [planets.txt],
-you can run the command:
+In general, the syntax for the [kill] command is as follows:
 
 ``` 
-elliot@ubuntu-linux:~$ echo "Mars is a planet." > planets.txt 
-elliot@ubuntu-linux:~$ cat planets.txt
-Mars is a planet
+kill -SIGNAL PID
 ```
 
-Awesome! Notice that the file [planets.txt] was also created in
-the process. Now let\'s add more planets to the file
-[planets.txt]:
+Let\'s start Firefox again as a background process:
 
 ``` 
-elliot@ubuntu-linux:~$ echo "Saturn is a planet." > planets.txt 
-elliot@ubuntu-linux:~$ cat planets.txt
-Saturn is a planet.
+elliot@ubuntu-linux:~$ firefox & 
+[1] 4907
 ```
 
-Hmmm. We added the line \"Saturn is a planet.\" but the line \"Mars is a
-planet.\" is now removed! That\'s because redirecting standard output
-with [\>] overwrites the file. What we need in this case is to
-append to the file and this can be done by using a double greater than
-sign [\>\>]. So now let\'s append the line \"Mars is a planet.\"
-back to the file [planets.txt]:
+Notice that the PID of Firefox is [4907] on my system. Now go
+ahead and open google.com on Firefox. After you have done
+that, go back to your terminal and send the [SIGSTOP] signal to
+Firefox:
 
 ``` 
-elliot@ubuntu-linux:~$ echo "Mars is a planet." >> planets.txt 
-elliot@ubuntu-linux:~$ cat planets.txt
-Saturn is a planet.
-Mars is a planet.
+elliot@ubuntu-linux:~$ kill -SIGSTOP ADD_FIREFOX_PROCESS_ID
 ```
 
-Great! As you can see, it added the line \"Mars is a planet.\" to the
-end of the file. Let\'s append one more planet:
+You will notice that Firefox becomes unresponsive; no problem -- we can fix that by sending the [SIGCONT]
+signal to Firefox:
 
 ``` 
-elliot@ubuntu-linux:~$ echo "Venus is a planet." >> planets.txt 
-elliot@ubuntu-linux:~$ cat planets.txt
-Saturn is a planet.
-Mars is a planet.
-Venus is a planet.
+elliot@ubuntu-linux:~$ kill -SIGCONT ADD_FIREFOX_PROCESS_ID
 ```
 
-Awesome! One more thing you need to know here is that the standard
-output ([stdout]) is linked to file descriptor 1.
+This will resurrect Firefox, and your webpage will now resume.
 
+So far, you have learned three signals:
 
-**WHAT IS A FILE DESCRIPTOR?**
+-   [SIGKILL]: Terminates a process
+-   [SIGSTOP]: Stops a process
+-   [SIGCONT]: Continues a process
 
-A file descriptor is a number that uniquely identifies an open file in a
-computer\'s operating system.
-
-
-And so running the command:
+You can use process names instead of process identifiers with the
+[pkill] command. For example, to close your terminal process, you
+can run the command:
 
 ``` 
-elliot@ubuntu-linux:~$ date > mydate.txt
+elliot@ubuntu-linux:~$ pkill -9 terminal
 ```
 
-Is the same as running the command:
+Now let\'s do something funny; open your terminal and run the command:
 
 ``` 
-elliot@ubuntu-linux:~$ date 1> mydate.txt
+elliot@ubuntu-linux:~$ pkill -SIGSTOP terminal
 ```
 
-Notice that the [1] in [1\>] references file descriptor 1
-([stdout]).
+Haha! Your terminal is now frozen. I will let you handle that!
 
+Viewing a process priority
+--------------------------
 
-Redirecting standard error
-==========================
-
-
-You will get an error message if you try to display the contents of a
-file that doesn\'t exist:
+Start Firefox as a background process:
 
 ``` 
-elliot@ubuntu-linux:~$ cat blabla 
-cat: blabla: No such file or directory
+elliot@ubuntu-linux:~$ firefox &
+ [1] 6849
 ```
 
-Now, this error message comes from standard error ([stderr]). If
-you try to redirect errors the same way we did with the standard output,
-it will not work:
+**Note: Replace `6849` with your firefox processId in commands below.**
+
+You can use the [ps] command to view a process\' nice value:
 
 ``` 
-elliot@ubuntu-linux:~$ cat blabla > error.txt 
-cat: blabla: No such file or directory
+elliot@ubuntu-linux:~$ ps -o nice -p 6849
+NI
+0
 ```
 
-As you can see, it still displays the error message on your terminal.
-That\'s because [stderr] is linked to file descriptor 2. And thus,
-to redirect errors, you have to use [2\>]:
+My Firefox process has a nice value of **0**, which is the default value
+(average priority).
+
+Setting priorities for new processes
+------------------------------------
+
+You can use the [nice] command to start a process with your
+desired priority.
+
+Let\'s say you are about to upgrade all the packages on your system; it
+would be wise to give such a process the highest priority possible. To
+do that, you can run the following command as the [root] user:
 
 ``` 
-elliot@ubuntu-linux:~$ cat blabla 2> error.txt
+root@ubuntu-linux:~# nice -n -20 apt-get upgrade
 ```
 
-Now if you displayed the contents of the file [error.txt], you
-would see the error message:
+Changing a process priority
+---------------------------
+
+You can use the [renice] command to change the priority of a
+running process. We have already seen that Firefox was running with a
+default process priority of zero; let\'s change Firefox\'s priority and
+give it the lowest priority possible:
 
 ``` 
-elliot@ubuntu-linux:~$ cat error.txt 
-cat: blabla: No such file or directory
+root@ubuntu-linux:~# renice -n 19 -p 6849
+6849 (process ID) old priority 0, new priority 19
 ```
 
-Let\'s try to remove a file that doesn\'t exist:
+Cool! Now I hope Firefox will not be very slow for me; after all, I just
+told my CPU not to give much attention to Firefox!
+
+
+The /proc directory
+===================
+
+
+Every process in Linux is represented by a directory in [/proc].
+For example, if your Firefox process has a PID of [6849], then the
+directory [/proc/6849] will represent the Firefox process:
 
 ``` 
-elliot@ubuntu-linux:~$ rm brrrr
-rm: cannot remove 'brrrr': No such file or directory
+root@ubuntu-linux:~# pgrep firefox
+6849
+root@ubuntu-linux:~# cd /proc/6849
+root@ubuntu-linux:/proc/6849#
 ```
 
-This also produces an error message. We can append this error message to
-the file\
-[error.txt] using [2\>\>]:
+Inside a process\' directory, you can find a lot of valuable and
+insightful information about the process. For example, you will find a
+soft link named [exe] that points to the process\' executable
+file:
 
 ``` 
-elliot@ubuntu-linux:~$ rm brrrr 2>> error.txt
+root@ubuntu-linux:/proc/6849# ls -l exe
+lrwxrwxrwx 1 elliot elliot 0 Nov 21 18:02 exe -> /usr/lib/firefox/firefox
 ```
 
-Now if you display the contents of the file [error.txt]:
+You will also find the [status] file, which stores various pieces
+of information about a process; these include the process state, the
+PPID, the amount of memory used by the process, and so on:
 
 ``` 
-elliot@ubuntu-linux:~$ cat error.txt 
-cat: blabla: No such file or directory
-rm: cannot remove 'brrrr': No such file or directory
+root@ubuntu-linux:/proc/6849# head status 
+Name: firefox
+Umask: 0022
+State: S (sleeping) Tgid: 6849
+Ngid: 0
+Pid: 6849
+PPid: 1990
+TracerPid: 0
+Uid: 1000 1000 1000 1000
+Gid: 1000 1000 1000 1000
 ```
 
-You will see both error messages.
-
-
-Redirecting all output to the same file
-=======================================
-
-
-There are some situations where you can get both standard output and an
-error message at the same time. For example, if you run the following
-command:
+The [limits] file displays the current limits set for the process:
 
 ``` 
-elliot@ubuntu-linux:~$ cat planets.txt blabla 
-Saturn is a planet.
-Mars is a planet.
-Venus is a planet.
-cat: blabla: No such file or directory
+root@ubuntu-linux:/proc/7882# cat limits
+Limit                  Soft Limit   Hard Limit   Units
+Max cpu time           unlimited    unlimited    seconds
+Max file size          unlimited    unlimited    bytes
+Max data size          unlimited    unlimited    bytes
+Max stack size         8388608      unlimited    bytes
+Max core file size     0            unlimited    bytes
+Max resident set       unlimited    unlimited    bytes
+Max processes          15599        15599        processes
+Max open files         4096         4096         files
+Max locked memory      16777216     16777216     bytes
+Max address space      unlimited    unlimited    bytes
+Max file locks         unlimited    unlimited    locks
+Max pending signals    15599        15599        signals
+Max msgqueue size      819200       819200       bytes
+Max nice priority      0            0 
+Max realtime priority  0            0 
+Max realtime timeout   unlimited    unlimited    us
 ```
 
-You will see that it displayed the contents of the file
-[planets.txt], but it also displayed an error message at the very
-last line (because there is no file [blabla] to concatenate).
-
-You can choose to redirect the error to another file:
-
-``` 
-elliot@ubuntu-linux:~$ cat planets.txt blabla 2> err.txt 
-Saturn is a planet.
-Mars is a planet.
-Venus is a planet.
-```
-
-This way, you only see the standard output on the screen. Or you may
-choose to redirect the standard output:
-
-``` 
-elliot@ubuntu-linux:~$ cat planets.txt blabla 1> output.txt 
-cat: blabla: No such file or directory
-```
-
-This way, you only see the error on the screen. Now, what if you want to
-redirect both the standard output and the error to the same file? In
-this case, you have to run:
-
-``` 
-elliot@ubuntu-linux:~$ cat planets.txt blabla > all.txt 2>&1
-```
-
-[&1] is referencing the standard output while [2\>] is
-referencing the standard error. So what we are basically saying here is:
-\"Redirect the stderr to the same place we are redirecting the stdout.\"
-
-Now if you displayed the contents of the file [all.txt]:
-
-``` 
-elliot@ubuntu-linux:~$ cat all.txt 
-Saturn is a planet.
-Mars is a planet.
-Venus is a planet.
-cat: blabla: No such file or directory
-```
-
-You can see it includes both the [stdout] and [stderr].
+The [fd] directory will show you all the files that the process is
+currently using on your system:
 
 
-Discarding output
-=================
+![](./images/551a24a5-a8ab-4e79-b700-4a2c3521736e.png)
 
 
-Sometimes you don\'t need to redirect output to anywhere; you just want
-to throw it away and get rid of it. In this case, you can redirect the
-output to [/dev/null]. This is often used with error messages. For
-example:
-
-``` 
-elliot@ubuntu-linux:~$ cat planets.txt blabla 2> /dev/null 
-Saturn is a planet.
-Mars is a planet.
-Venus is a planet.
-```
-
-This will redirect the error message to [/dev/null]. You can think
-of [/dev/null] as a garbage collector.
 
 
-Redirecting standard input
-==========================
+You can also use the [lsof] command to list all the files a
+process is using:
 
 
-Some Linux commands interact with the user input through the standard
-input (which is your keyboard by default). For example, the [read]
-command reads input from the user and stores it in a variable. For
-example, you can run the command [read weather]:
+![](./images/c2be5234-6384-415d-9d59-697173ccf268.png)
 
-``` 
-elliot@ubuntu-linux:~$ read weather 
-It is raining.
-```
 
-It will then wait for you to enter a line of text. I entered the line
-[It is raining.] and so it stored the line in the [weather]
-variable. You can use the [echo] command to display the contents
-of a variable:
 
-``` 
-elliot@ubuntu-linux:~$ echo $weather 
-It is raining.
-```
-
-Notice that you have to precede the variable name with a dollar sign.
-The [read] command is particularly useful in shell scripts, which
-we will cover later on. Now notice I wrote the line [It is
-raining.] using my keyboard. However, I can redirect standard
-input to come from a file instead using the less-than sign [\<],
-for example:
-
-``` 
-elliot@ubuntu-linux:~$ read message < mydate.txt
-```
-
-This will read the contents of the file [mydate.txt] and store it
-in the [message] variable:
-
-``` 
-elliot@ubuntu-linux:~$ echo $message 
-Wed Mar 15 11:51:49 UTC 2023
-```
-
-As you can see, the variable [message] now has the same contents
-as the file [my- date.txt].
 
 
 Knowledge check
 ===============
 
 
-For the following exercises, open up your terminal and try to solve the
+For the following exercises, open up your Terminal and try to solve the
 following tasks:
 
-1.  Display only the *5th* line of the file [facts.txt].
-2.  Save the output of the [free] command into a file named
-    [system.txt].
-3.  Append the output of the [lscpu] command to the file
-    [system.txt].
-4.  Run the command [rmdir /var] and redirect the error message to
-    the file [error.txt].
+1.  List the process ID of your running terminal.
+2.  List the parent process ID of your running terminal.
+3.  Use the [kill] command to close your terminal.
+4.  Start Firefox as a background process.
+5.  Change Firefox\'s priority to a maximum priority.

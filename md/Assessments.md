@@ -78,7 +78,7 @@ True or false
 4.  False
 5.  True
 
-Knowledge check 6
+Knowledge check 5
 =================
 
 
@@ -105,7 +105,7 @@ True or false
 7.  True
 
 
-Knowledge check 9
+Knowledge check 6
 =================
 
 
@@ -115,8 +115,8 @@ Knowledge check 9
 4.  [rmdir /var 2\> error.txt]
 
 
-Knowledge check 10
-==================
+Knowledge check 7
+=================
 
 
 1.  [du -b /etc/hostname]
@@ -126,8 +126,8 @@ Knowledge check 10
 5.  [uptime *\|* tr \[:lower:\] \[:upper:\]]
 
 
-Knowledge check 11
-==================
+Knowledge check 8
+=================
 
 
 1.  [locate boot.log]
@@ -137,8 +137,8 @@ Knowledge check 11
 5.  [find / -group developers]
 
 
-Knowledge check 13
-==================
+Knowledge check 9
+=================
 
 
 1.  [pgrep terminal]
@@ -148,7 +148,7 @@ Knowledge check 13
 5.  [renice -n -20 pid\_of\_firefox]
 
 
-Knowledge check 16
+Knowledge check 10
 ==================
 
 
@@ -173,7 +173,7 @@ Knowledge check 16
     
 
 
-Knowledge check 17
+Knowledge check 11
 ==================
 
 
@@ -183,7 +183,7 @@ Knowledge check 17
     /root/holidays.txt]
 
 
-Knowledge check 18
+Knowledge check 12
 ==================
 
 
